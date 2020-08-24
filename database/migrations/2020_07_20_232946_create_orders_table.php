@@ -27,7 +27,7 @@ class CreateOrdersTable extends Migration
 
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("ORDR_USER_ID")->nullable()->constrained("users");
+            $table->foreignId("ORDR_CLNT_ID")->nullable()->constrained("clients");
             $table->dateTime("ORDR_OPEN_DATE");
             $table->dateTime("ORDR_DLVR_DATE")->nullable();
             $table->foreignId("ORDR_STTS_ID")->constrained("order_status");
@@ -48,7 +48,8 @@ class CreateOrdersTable extends Migration
             $table->id();
             $table->foreignId("ORIT_ORDR_ID")->constrained("orders");
             $table->foreignId("ORIT_INVT_ID")->constrained("inventory");
-            $table->tinyInteger("ORIT_CUNT")->default(1);
+            $table->tinyInteger("ORIT_PRCE");
+            $table->tinyInteger("ORIT_KMS")->default(1);
         });
 
         Schema::table('inventory_transactions', function(Blueprint $table){

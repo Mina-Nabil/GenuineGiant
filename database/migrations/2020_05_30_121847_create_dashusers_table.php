@@ -22,7 +22,7 @@ class CreateDashusersTable extends Migration
         Schema::create('dash_users', function (Blueprint $table) {
             $table->increments('id');
             $table->string('DASH_USNM');
-            $table->string('DASH_FLNM');
+            $table->string('DASH_FLNM')->nullable();
             $table->string('DASH_PASS');
             $table->string('DASH_IMGE')->nullable();
             $table->unsignedInteger('DASH_TYPE_ID')->default(1);

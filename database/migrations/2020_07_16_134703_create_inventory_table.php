@@ -15,20 +15,12 @@ class CreateInventoryTable extends Migration
     {
 
      
-
-        Schema::create('sizes', function (Blueprint $table){
-            $table->id();
-            $table->string("SIZE_NAME")->unique();
-            $table->string("SIZE_ARBC_NAME")->nullable();
-            $table->string("SIZE_CODE")->unique();  //X - XL - S
-        });
-
         Schema::create('inventory', function (Blueprint $table) {
             $table->id();
             $table->foreignId("INVT_PROD_ID")->constrained("products");
-            $table->foreignId("INVT_COLR_ID")->constrained("colors");
-            $table->foreignId("INVT_SIZE_ID")->constrained("sizes");
-            $table->integer("INVT_CUNT")->default(0);
+            $table->unsignedInteger("INTR_DASH_ID")->nullable(); //producer
+            $table->foreign("INTR_DASH_ID")->references("id")->on("dash_users"); //dash user
+            $table->double("INVT_KMS")->default(0);
             $table->timestamps();
         });
     }
