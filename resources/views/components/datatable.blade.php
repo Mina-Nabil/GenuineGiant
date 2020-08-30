@@ -22,7 +22,7 @@
         <h6 class="card-subtitle">{{$subtitle}}</h6>
         @endif
         <div class="table-responsive m-t-5">
-            <table id="{{$id}}" class="table color-bordered-table table-striped full-color-table full-info-table hover-table" data-display-length='-1' data-order="[]">
+            <table id="{{$id}}" class="table color-bordered-table table-striped full-color-table full-success-table hover-table" data-display-length='-1' data-order="[]">
                 <thead>
                     <tr>
                         @foreach($cols as $col)
@@ -39,6 +39,8 @@
                         @if(is_array($att))
                         @if(array_key_exists('edit', $att))
                         <td><a href="{{ url( $att['edit']['url'] . $item->{$att['edit']['att']}) }}"><img src="{{ asset('images/edit.png') }}" width=25 height=25></a></td>
+                        @elseif(array_key_exists('del', $att))
+                        <td><a href="{{ url( $att['del']['url'] . $item->{$att['del']['att']}) }}"><img src="{{ asset('images/del.png') }}" width=25 height=25></a></td>
                         @elseif(array_key_exists('foreign', $att))
                         <td>{{ $item->{$att['foreign'][0]}->{$att['foreign'][1]}  }}</td>
                         @elseif(array_key_exists('sumForeign', $att))
@@ -77,6 +79,8 @@
                         </td>
                         @elseif(array_key_exists('date', $att))
                         <td>{{ $item->{$att['date']['att']}->format($att['date']['format'])  }}</a></td>
+                        @elseif(array_key_exists('number', $att))
+                        <td>{{ number_format($item->{$att['number']['att']}, $att['nums'] ?? 2)  }}</a></td>
                         @elseif(array_key_exists('attUrl', $att))
                         <td><a href="{{ url($att['attUrl']['url'] . '/' . $item->{$att['attUrl']['urlAtt']}) }}">{{ $item->{$att['attUrl']['shownAtt']}  }}</a></td>
                         @elseif(array_key_exists('urlOrStatic', $att))

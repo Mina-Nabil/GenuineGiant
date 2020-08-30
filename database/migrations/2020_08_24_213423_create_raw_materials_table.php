@@ -18,15 +18,18 @@ class CreateRawMaterialsTable extends Migration
             $table->string("RWMT_NAME")->unique();
             $table->string("RWMT_ARBC_NAME")->nullable();
             $table->double("RWMT_COST")->nullable(); //estimated cost
+            $table->double("RWMT_BLNC")->default(0); //estimated cost
         });
         
         Schema::create('raw_inventory', function (Blueprint $table){
             $table->id();
             $table->foreignId("RINV_RWMT_ID")->constrained('raw_materials');
-            $table->double("RINV_KMIN")->default(0);
-            $table->double("RINV_KMIN")->default(0);
+            $table->double("RINV_IN")->default(0);
+            $table->double("RINV_OUT")->default(0);
             $table->double("RINV_BLNC");
             $table->double("RINV_PRCE")->default(0); //price per kilo
+            $table->foreignId("RINV_DASH_ID")->constrained('dash_users'); //user adding this inventory 
+
             $table->timestamps();
         });
     }
@@ -38,6 +41,7 @@ class CreateRawMaterialsTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('raw_inventory');
         Schema::dropIfExists('raw_materials');
     }
 }

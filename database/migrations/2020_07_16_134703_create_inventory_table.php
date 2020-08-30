@@ -18,8 +18,7 @@ class CreateInventoryTable extends Migration
         Schema::create('inventory', function (Blueprint $table) {
             $table->id();
             $table->foreignId("INVT_PROD_ID")->constrained("products");
-            $table->unsignedInteger("INTR_DASH_ID")->nullable(); //producer
-            $table->foreign("INTR_DASH_ID")->references("id")->on("dash_users"); //dash user
+            $table->foreignId("INTR_DASH_ID")->nullable()->constrained("dash_users"); //producer
             $table->double("INVT_KMS")->default(0);
             $table->timestamps();
         });

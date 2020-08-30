@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Icon;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,7 +16,6 @@ class CategoriesController extends Controller
     {
         $this->data['items'] = SubCategory::all();
         $this->data['categories'] = Category::all();
-        $this->data['icons'] = Icon::all();
         $this->data['title'] = "Products Classifications";
         $this->data['subTitle'] = "Manage Categories and Sub-Categories";
         $this->data['cols'] = ['Category', 'Sub Category', 'Edit'];
@@ -72,7 +70,6 @@ class CategoriesController extends Controller
 
         $request->validate([
             "catgName"      => "required|unique:categories,CATG_NAME",
-            "arbcName"  => "required",
         ]);
 
         $category = new Category();
@@ -85,7 +82,6 @@ class CategoriesController extends Controller
 
         $request->validate([
             "name" => "required|unique:sub_categories,SBCT_NAME",
-            "arbcName" => "required",
             "category" => "required"
         ]);
 
@@ -93,7 +89,8 @@ class CategoriesController extends Controller
         $subcategory->SBCT_NAME = $request->name;
         $subcategory->SBCT_ARBC_NAME = $request->arbcName;
         $subcategory->SBCT_CATG_ID = $request->category;
-        $subcategory->SBCT_ICON_ID = $request->icon;
+        $subcategory->SBCT_DESC = $request->desc;
+   
         if ($request->hasFile('photo')) {
             $path = $request->photo->store('images/catg/', 'public');
             $subcategory->SBCT_IMGE = $path;
@@ -113,14 +110,13 @@ class CategoriesController extends Controller
         $request->validate([
             "name" => ["required",  Rule::unique('sub_categories', "SBCT_NAME")->ignore($subcategory->SBCT_NAME, "SBCT_NAME"),],
             "category" => "required",
-            "arbcName" => "required",
             "id" => "required",
         ]);
 
         $subcategory->SBCT_NAME = $request->name;
         $subcategory->SBCT_ARBC_NAME = $request->arbcName;
         $subcategory->SBCT_CATG_ID = $request->category;
-        $subcategory->SBCT_ICON_ID = $request->icon;
+        $subcategory->SBCT_DESC = $request->desc;
         if ($request->hasFile('photo')) {
             $path = $request->photo->store('images/catg/', 'public');
             $subcategory->SBCT_IMGE = $path;
@@ -134,7 +130,6 @@ class CategoriesController extends Controller
     public function updateCategory(Request $request){
         $request->validate([
             "catgName" => "required",
-            "arbcName" => "required",
             "id" => "required",
         ]);
 

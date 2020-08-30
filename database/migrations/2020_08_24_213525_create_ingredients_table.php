@@ -15,7 +15,9 @@ class CreateIngredientsTable extends Migration
     {
         Schema::create('ingredients', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId("IGDT_PROD_ID")->constrained("products");
+            $table->foreignId("IGDT_RWMT_ID")->constrained("raw_materials");
+            $table->double("IGDT_GRAM"); //how many kms needed per prod kilo
         });
     }
 

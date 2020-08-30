@@ -16,16 +16,15 @@ class CreateTimelineTable extends Migration
         Schema::create('timeline', function (Blueprint $table) {
             $table->id();
             $table->foreignId('TMLN_ORDR_ID')->constrained('orders');
-            $table->unsignedInteger("TMLN_DASH_ID")->nullable();
-            $table->foreign("TMLN_DASH_ID")->references("id")->on("dash_users");
+            $table->foreignId("TMLN_DASH_ID")->constrained("dash_users"); 
             $table->string('TMLN_TEXT');
             $table->timestamps();
         });
 
         Schema::table('orders', function (Blueprint $table){
             $table->foreignId('ORDR_RTRN_ID')->nullable()->constrained('orders');
-            $table->unsignedInteger("ORDR_DASH_ID")->nullable();
-            $table->foreign("ORDR_DASH_ID")->references("id")->on("dash_users");
+            $table->foreignId("ORDR_DASH_ID")->constrained("dash_users"); 
+
         });
     }
 

@@ -34,7 +34,7 @@ class CreateDriversTable extends Migration
     public function down()
     {
         Schema::table("orders", function (Blueprint $table){
-            $table->dropForeign("drivers_ordr_drvr_id_foreign");
+            $table->dropForeign("orders_ordr_drvr_id_foreign");
             $table->dropColumn("ORDR_DRVR_ID");
         });
         Schema::dropIfExists('drivers');

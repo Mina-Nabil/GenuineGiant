@@ -20,28 +20,16 @@ class Product extends Model
         return $this->belongsTo("App\Models\SubCategory", "PROD_SBCT_ID", 'id');
     }
 
-    public function sizechart(){
-        return $this->hasOne("App\Models\SizeChart", "id", "PROD_SZCT_ID");
-    }
-
-    public function mainImage(){
-        return $this->belongsTo("App\Models\ProductImages", "PROD_PIMG_ID", "id");
-    }
-
-    public function images(){
-        return $this->hasMany("App\Models\ProductImages", "PIMG_PROD_ID", "id");
-    }
     public function stock(){
         return $this->hasMany("App\Models\Inventory", "INVT_PROD_ID", "id");
     }
 
-    public function sizes(){
-        return DB::table("sizes")->join("inventory","INVT_SIZE_ID","=","sizes.id")
-        ->join("products", "INVT_PROD_ID", "=", "inventory.id")
-        ->selectRaw("DISTINCT SIZE_NAME")
-        ->where("products.id","=", $this->id)
-        ->get();
-        
+    public function ingredients(){
+        return $this->hasMany('App\Models\Ingredient', "IGDT_PROD_ID");
+    }
+
+    public function rawMaterials(){
+        return $this->belongsToMany("App\Models\RawMaterial", "ingredients", 'IGDT_PROD_ID','IGDT_RWMT_ID');
     }
 
     public static function newArrivals($dateInterval){
@@ -53,7 +41,5 @@ class Product extends Model
         ->get();
     }
 
-    public function tags(){
-        return $this->belongsToMany("App\Models\Tags", "prod_tag", "PDTG_PROD_ID", "PDTG_TAGS_ID");
-    }
+
 }

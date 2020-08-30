@@ -9,7 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentOption;
 use App\Models\Product;
-use App\Models\User;
+use App\Models\Client;
 use DateInterval;
 use DateTime;
 use Illuminate\Http\Request;
@@ -57,9 +57,9 @@ class OrdersController extends Controller
         $this->initTableArr(false, $stateID, date('m'), date('Y'));
         $startDate  = $this->getStartDate(date('m'), date('Y'));
         $endDate    = $this->getEndDate(date('m'), date('Y'));
-        $this->data['deliveredCount'] = Order::getOrdersCountByState(4,$startDate,$endDate);
-        $this->data['cancelledCount'] = Order::getOrdersCountByState(5,$startDate,$endDate);
-        $this->data['returnedCount'] = Order::getOrdersCountByState(6,$startDate,$endDate);
+        $this->data['deliveredCount'] = Order::getOrdersCountByState(4, $startDate, $endDate);
+        $this->data['cancelledCount'] = Order::getOrdersCountByState(5, $startDate, $endDate);
+        $this->data['returnedCount'] = Order::getOrdersCountByState(6, $startDate, $endDate);
         $this->data['historyURL'] = "orders/month";
         return view("orders.history", $this->data);
     }
@@ -86,7 +86,7 @@ class OrdersController extends Controller
     {
         $this->data['inventory']    =   Inventory::with("color", "size", "product")->where("INVT_CUNT", ">", 0)->get();
         $this->data['areas']        =   Area::where('AREA_ACTV', 1)->get();
-        $this->data['users']        =   User::all();
+        $this->data['clients']        =   Client::all();
         $this->data['payOptions']   =  PaymentOption::all();
         $this->data['formTitle'] = "Add New Order";
         $this->data['formURL'] = "orders/insert";
@@ -151,14 +151,15 @@ class OrdersController extends Controller
                 $orderItem = $order->order_items()->firstOrNew(
                     ['ORIT_INVT_ID' => $item['ORIT_INVT_ID']]
                 );
-                $orderItem->ORIT_CUNT += $item['ORIT_CUNT'];
+                $orderItem->ORIT_KMS += $item['ORIT_KMS'];
                 $orderItem->ORIT_VRFD = 0;
                 $inventory = Inventory::findOrFail($item['ORIT_INVT_ID']);
-                $inventory->INVT_CUNT -= $item['ORIT_CUNT'];
+                $inventory->INVT_CUNT -= $item['ORIT_KMS'];
                 $orderItem->save();
                 $inventory->save();
             }
             $order->recalculateTotal();
+            $order->addTimeline("New Items added to Order");
         });
         return redirect("orders/details/" . $order->id);
     }
@@ -178,6 +179,7 @@ class OrdersController extends Controller
             if ($isReady) {
                 $order->ORDR_STTS_ID = 2;
                 $order->save();
+                $order->addTimeline("Order set as Ready");
             }
         });
         return redirect("orders/details/" . $order->id);
@@ -191,7 +193,7 @@ class OrdersController extends Controller
             $isReturned = true;
             foreach ($order->order_items as $item) {
                 $inventory = Inventory::findOrfail($item->ORIT_INVT_ID);
-                $inventory->INVT_CUNT += $item->ORIT_CUNT;
+                $inventory->INVT_CUNT += $item->ORIT_KMS;
                 if (!$inventory->save()) {
                     $isReturned = false;
                     break;
@@ -203,6 +205,7 @@ class OrdersController extends Controller
                 $order->ORDR_DLVR_DATE = date('Y-m-d H:i:s');
                 $order->ORDR_DRVR_ID = null;
                 $order->save();
+                $order->addTimeline("Order cancelled :(");
             }
         });
         return redirect("orders/details/" . $order->id);
@@ -220,22 +223,28 @@ class OrdersController extends Controller
     public function setInDelivery($id)
     {
         $order = Order::findOrFail($id);
-        if ($order->ORDR_STTS_ID == 2 && isset($order->driver) && $order->driver->DRVR_ACTV) {
-            $order->ORDR_STTS_ID = 3;
-            $order->save();
-        }
+        DB::transaction(function () use ($order) {
+            if ($order->ORDR_STTS_ID == 2 && isset($order->driver) && $order->driver->DRVR_ACTV) {
+                $order->ORDR_STTS_ID = 3;
+                $order->save();
+            }
+            $order->addTimeline("Order set as in delivery");
+        });
         return redirect("orders/details/" . $order->id);
     }
 
     public function setDelivered($id)
     {
         $order = Order::findOrFail($id);
-        $remainingMoney = $order->ORDR_TOTL - $order->ORDR_DISC - $order->ORDR_PAID;
-        if ($order->ORDR_STTS_ID == 3 && $remainingMoney == 0) {
-            $order->ORDR_STTS_ID = 4;
-            $order->ORDR_DLVR_DATE = date('Y-m-d H:i:s');
-            $order->save();
-        }
+        DB::transaction(function () use ($order) {
+            $remainingMoney = $order->ORDR_TOTL - $order->ORDR_DISC - $order->ORDR_PAID;
+            if ($order->ORDR_STTS_ID == 3 && $remainingMoney == 0) {
+                $order->ORDR_STTS_ID = 4;
+                $order->ORDR_DLVR_DATE = date('Y-m-d H:i:s');
+                $order->save();
+            }
+            $order->addTimeline("Order delivered :)");
+        });
         return redirect("orders/details/" . $order->id);
     }
 
@@ -246,7 +255,7 @@ class OrdersController extends Controller
             $isReturned = true;
             foreach ($order->order_items as $item) {
                 $inventory = Inventory::findOrfail($item->ORIT_INVT_ID);
-                $inventory->INVT_CUNT += $item->ORIT_CUNT;
+                $inventory->INVT_CUNT += $item->ORIT_KMS;
                 if (!$inventory->save()) {
                     $isReturned = false;
                     break;
@@ -257,6 +266,7 @@ class OrdersController extends Controller
                 $order->ORDR_PAID = 0;
                 $order->ORDR_DLVR_DATE = date('Y-m-d H:i:s');
                 $order->save();
+                $order->addTimeline("Order fully returned :(");
             }
         });
     }
@@ -284,6 +294,7 @@ class OrdersController extends Controller
             $retOrder->save();
             $order->ORDR_RTRN_ID = $retOrder->id; // new returned order
             $order->save();
+            $order->addTimeline("New Return Order opened");
         });
         return redirect("orders/details/" . $order->id);
     }
@@ -296,10 +307,14 @@ class OrdersController extends Controller
         ]);
 
         $order = Order::findOrFail($request->id);
-        if ($order->ORDR_STTS_ID < 3) { // New or ready
-            $order->ORDR_DRVR_ID = $request->driver;
-            $order->save();
-        }
+        DB::transaction(function () use ($request, $order) {
+            if ($order->ORDR_STTS_ID < 3) { // New or ready
+                $order->ORDR_DRVR_ID = $request->driver;
+                $order->save();
+            }
+            $driver = Driver::findOrFail($request->driver);
+            $order->addTimeline($driver->DRVR_NAME . " assigned as the order delivery man");
+        });
         return redirect("orders/details/" . $order->id);
     }
 
@@ -310,10 +325,14 @@ class OrdersController extends Controller
             'id' => "required",
             'payment' => "required|min:0|max:" . $order->ORDR_TOTL
         ]);
-        if ($order->ORDR_STTS_ID < 4) {
-            $order->ORDR_PAID += $request->payment;
-            $order->save();
-        }
+        DB::transaction(function () use ($request, $order) {
+            if ($order->ORDR_STTS_ID < 4) {
+                $order->ORDR_PAID += $request->payment;
+                $order->save();
+            }
+            $order->addTimeline($request->payment . "EGP collected as Normal Order payment");
+        });
+
         return redirect("orders/details/" . $order->id);
     }
 
@@ -324,10 +343,11 @@ class OrdersController extends Controller
             'id' => "required",
             'deliveryPaid' => "required|min:0"
         ]);
-
-
-        $order->ORDR_DLFE = $request->deliveryPaid;
-        $order->save();
+        DB::transaction(function () use ($request, $order) {
+            $order->ORDR_DLFE = $request->deliveryPaid;
+            $order->save();
+            $order->addTimeline($request->deliveryPaid . "EGP collected as Delivery payment");
+        });
         return redirect("orders/details/" . $order->id);
     }
 
@@ -338,11 +358,14 @@ class OrdersController extends Controller
             'id' => "required",
             'discount' => "required|min:0|max:" . $order->ORDR_TOTL
         ]);
+        DB::transaction(function () use ($request, $order) {
+            if ($order->ORDR_STTS_ID < 4) {
+                $order->ORDR_DISC = $request->discount;
+                $order->save();
+            }
+            $order->addTimeline("Discount added on order, discount now is set to " . $order->ORDR_DISC);
+        });
 
-        if ($order->ORDR_STTS_ID < 4) {
-            $order->ORDR_DISC = $request->discount;
-            $order->save();
-        }
         return redirect("orders/details/" . $order->id);
     }
 
@@ -359,6 +382,7 @@ class OrdersController extends Controller
         } else {
             $item->ORIT_VRFD = 1;
         }
+        $order->addTimeline("Item set as ready");
         return (($item->save()) ? 1 : 'failed');
     }
 
@@ -372,10 +396,11 @@ class OrdersController extends Controller
                 return 'failed';
             }
             $inventory = Inventory::findOrFail($item->ORIT_INVT_ID);
-            $inventory->INVT_CUNT += $item->ORIT_CUNT;
+            $inventory->INVT_CUNT += $item->ORIT_KMS;
             $item->delete();
             $inventory->save();
             $order->recalculateTotal();
+            $order->addTimeline("Item deleted by dashboard user");
         });
         return redirect("orders/details/" . $order->id);
     }
@@ -397,7 +422,7 @@ class OrdersController extends Controller
                 $returnedItem = $returnOrder->order_items()->firstOrNew([
                     'ORIT_INVT_ID' => $orderItem->ORIT_INVT_ID
                 ]);
-                $returnedItem->ORIT_CUNT += $request->count;
+                $returnedItem->ORIT_KMS += $request->count;
                 $returnedItem->ORIT_VRFD = 1;
                 $returnedItem->save();
                 $returnOrder->recalculateTotal();
@@ -408,19 +433,21 @@ class OrdersController extends Controller
                 $inventory->save();
 
                 //Adjust old order
-                $orderItem->ORIT_CUNT -= $request->count;
-                if ($orderItem->ORIT_CUNT < 1)
+                $orderItem->ORIT_KMS -= $request->count;
+                if ($orderItem->ORIT_KMS < 1)
                     $orderItem->delete();
                 else
                     $orderItem->save();
                 $order->recalculateTotal();
+                $order->addTimeline("Item added to Return Order");
             } elseif ($order->ORDR_STTS_ID != 1) { //if it is not still new
                 return redirect("orders/details/" . $orderItem->ORIT_ORDR_ID);
             } else {
-                $orderItem->ORIT_CUNT = $request->count;
+                $orderItem->ORIT_KMS = $request->count;
                 $orderItem->ORIT_VRFD = 0;
                 $orderItem->save();
                 $order->recalculateTotal();
+                $order->addTimeline("Item quantity changed by dashboard user");
             }
         });
         return redirect("orders/details/" . $orderItem->ORIT_ORDR_ID);
@@ -432,10 +459,14 @@ class OrdersController extends Controller
             "id" => "required",
 
         ]);
-        $order = Order::findOrfail($request->od);
-        $order->ORDR_ADRS = $request->address;
-        $order->ORDR_NOTE = $request->note;
-        $order->ORDR_AREA_ID = $request->area;
+        $order = Order::findOrfail($request->id);
+        DB::transaction(function () use ($request, $order) {
+            $order->ORDR_ADRS = $request->address;
+            $order->ORDR_NOTE = $request->note;
+            $order->ORDR_AREA_ID = $request->area;
+            $order->save();
+            $order->addTimeline("Order edited by dashboard user");
+        });
         return redirect("orders/details/" . $order->id);
     }
 
@@ -452,32 +483,34 @@ class OrdersController extends Controller
             "option"        =>  "required",
             "address"      =>  "required"
         ]);
-
         $order = new Order();
-        if (isset($request->user))
-            $order->ORDR_USER_ID = $request->user;
-        else {
-            $order->ORDR_GEST_NAME = $request->guestName;
-            $order->ORDR_GEST_MOBN = $request->guestMob;
-        }
-        $order->ORDR_OPEN_DATE = date('Y-m-d H:i:s');
-        $order->ORDR_ADRS = $request->address;
-        $order->ORDR_NOTE = $request->note;
-        $order->ORDR_AREA_ID = $request->area;
-        $order->ORDR_PYOP_ID = $request->option;
-        $order->ORDR_STTS_ID = 1; // new order
-        $order->ORDR_DASH_ID = Auth::user()->id; // new order
+        DB::transaction(function () use ($request, $order) {
+            if (isset($request->user))
+                $order->ORDR_USER_ID = $request->user;
+            else {
+                $order->ORDR_GEST_NAME = $request->guestName;
+                $order->ORDR_GEST_MOBN = $request->guestMob;
+            }
+            $order->ORDR_OPEN_DATE = date('Y-m-d H:i:s');
+            $order->ORDR_ADRS = $request->address;
+            $order->ORDR_NOTE = $request->note;
+            $order->ORDR_AREA_ID = $request->area;
+            $order->ORDR_PYOP_ID = $request->option;
+            $order->ORDR_STTS_ID = 1; // new order
+            $order->ORDR_DASH_ID = Auth::user()->id; // new order
 
-        $orderItemArray = $this->getOrderItemsObjectArray($request);
-        $order->ORDR_TOTL = $this->getOrderTotal($request);
+            $orderItemArray = $this->getOrderItemsObjectArray($request);
+            $order->ORDR_TOTL = $this->getOrderTotal($request);
 
-        $order->save();
-        $order->order_items()->saveMany($orderItemArray);
-        foreach ($orderItemArray as $item) {
-            $inventory = Inventory::findOrFail($item->ORIT_INVT_ID);
-            $inventory->INVT_CUNT -= $item->ORIT_CUNT;
-            $inventory->save();
-        }
+            $order->save();
+            $order->addTimeline("Order Opened by dashboard user");
+            $order->order_items()->saveMany($orderItemArray);
+            foreach ($orderItemArray as $item) {
+                $inventory = Inventory::findOrFail($item->ORIT_INVT_ID);
+                $inventory->INVT_CUNT -= $item->ORIT_KMS;
+                $inventory->save();
+            }
+        });
 
         return redirect("orders/details/" . $order->id);
     }
@@ -538,7 +571,7 @@ class OrdersController extends Controller
         foreach ($request->item as $index => $item) {
             array_push(
                 $retArr,
-                ["ORIT_INVT_ID" => $item, "ORIT_CUNT" => $request->count[$index]]
+                ["ORIT_INVT_ID" => $item, "ORIT_KMS" => $request->count[$index]]
             );
         }
         return $retArr;
@@ -549,7 +582,7 @@ class OrdersController extends Controller
         $retArr = array();
         foreach ($request->item as $index => $item) {
             array_push($retArr, new OrderItem(
-                ["ORIT_INVT_ID" => $item, "ORIT_CUNT" => $request->count[$index]]
+                ["ORIT_INVT_ID" => $item, "ORIT_KMS" => $request->count[$index]]
             ));
         }
         return $retArr;

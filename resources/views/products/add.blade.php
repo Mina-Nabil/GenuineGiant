@@ -17,13 +17,14 @@
                         <label>Category</label>
                         <div class="input-group mb-3">
                             <select name=category class="select2 form-control custom-select" style="width: 100%; height:36px;" required>
-                                <option value="" disabled selected >Pick From Categories</option>
+                                <option value="" disabled selected>Pick From Categories</option>
                                 @foreach($categories as $categry)
-                                <option value="{{ $categry->id }}"
-                                @if(isset($product) && $categry->id == $product->PROD_SBCT_ID)
+                                <option value="{{ $categry->id }}" @if(isset($product) && $categry->id == $product->PROD_SBCT_ID)
                                     selected
-                                @endif
-                                >{{$categry->category->CATG_NAME}} : {{$categry->SBCT_NAME}}</option>
+                                    @elseif(old('category') == $categry->id)
+                                    selected
+                                    @endif
+                                    >{{$categry->category->CATG_NAME}} : {{$categry->SBCT_NAME}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -40,39 +41,46 @@
                     <div class="form-group">
                         <label>Arabic Title</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" name=arbcName placeholder="اسم الموديل بالعربيه" value="{{ (isset($product)) ? $product->PROD_ARBC_NAME : old('mail')}}" required>
+                            <input type="text" class="form-control" name=arbcName placeholder="اسم الموديل بالعربيه" value="{{ (isset($product)) ? $product->PROD_ARBC_NAME : old('mail')}}">
                         </div>
                         <small class="text-danger">{{$errors->first('arbcName')}}</small>
                     </div>
 
                     <div class="form-group">
                         <label>Description</label>
-                        <textarea class="form-control" rows="3" required name=desc>{{(isset($product)) ? $product->PROD_DESC : old('desc')}}</textarea>
+                        <textarea class="form-control" rows="3" name=desc>{{(isset($product)) ? $product->PROD_DESC : old('desc')}}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label>Arabic Description</label>
-                        <textarea class="form-control" rows="3" required name=arbcDesc>{{(isset($product)) ? $product->PROD_ARBC_DESC : old('desc')}}</textarea>
+                        <textarea class="form-control" rows="3" name=arbcDesc>{{(isset($product)) ? $product->PROD_ARBC_DESC : old('desc')}}</textarea>
                     </div>
 
                     <div class="form-group">
-                        <label>Barcode</label>
+                        <label>Retail Price</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Model Barcode" name=barCode value="{{ (isset($product)) ? $product->PROD_BRCD : old('barCode') }}">
+                            <input type="number" class="form-control" step=0.01 placeholder="Normal Price per kilo" name=retailPrice
+                                value="{{ (isset($product)) ? $product->PROD_RETL_PRCE : old('retailPrice')}}" required>
                         </div>
-                        @if($errors->first('barCode') !=null)
-                        <small class="text-danger">{{$errors->first('barCode')}}</small>
-                        @else
-                        <small>Not Required</small>
-                        @endif
+                        <small class="text-danger">{{$errors->first('retailPrice')}}</small>
                     </div>
 
                     <div class="form-group">
-                        <label>Price</label>
+                        <label>Whole Price</label>
                         <div class="input-group mb-3">
-                            <input type="number" class="form-control" placeholder="Model Price" name=price value="{{ (isset($product)) ? $product->PROD_PRCE : old('price')}}" required>
+                            <input type="number" class="form-control" step=0.01 placeholder="Price for bulk sales" name=wholePrice
+                                value="{{ (isset($product)) ? $product->PROD_WHLE_PRCE : old('wholePrice')}}" required>
                         </div>
-                        <small class="text-danger">{{$errors->first('price')}}</small>
+                        <small class="text-danger">{{$errors->first('wholePrice')}}</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Inside Price</label>
+                        <div class="input-group mb-3">
+                            <input type="number" class="form-control" step=0.01 placeholder="Lowest price for huge sales" name=insidePrice
+                                value="{{ (isset($product)) ? $product->PROD_INSD_PRCE : old('insidePrice')}}" required>
+                        </div>
+                        <small class="text-danger">{{$errors->first('insidePrice')}}</small>
                     </div>
 
                     <div class="form-group">
@@ -86,21 +94,6 @@
                         <small>Not Required</small>
                         @endif
                     </div>
-
-                    <div class="form-group">
-                        <label>Offer Percentage</label>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" placeholder="Model Offer Percentage" name=offer value="{{ (isset($product)) ? $product->PROD_OFFR : old('offer') }}">
-                        </div>
-                        @if($errors->first('offer') != null)
-                        <small class="text-danger">{{$errors->first('offer')}}</small>
-                        @else
-                        <small>Not Required - Default 0%</small>
-                        @endif
-                    </div>
-
-
-
 
                     <button type="submit" class="btn btn-success mr-2">Submit</button>
                     @if($isCancel)

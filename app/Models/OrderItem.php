@@ -13,7 +13,7 @@ class OrderItem extends Model
         "ORIT_INVT_ID", "ORIT_CUNT" 
     ];
     public $attributes = [
-        "ORIT_CUNT" => 0
+        "ORIT_KMS" => 0
     ];
 
     public function order()

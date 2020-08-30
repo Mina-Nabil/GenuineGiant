@@ -24,7 +24,7 @@
                     <div class="form-group">
                         <label>Arabic Name*</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Arabic Name" name=arbcName value="{{ (isset($subcategory)) ? $subcategory->SBCT_ARBC_NAME : old('arbcName')}}" required>
+                            <input type="text" class="form-control" placeholder="Arabic Name" name=arbcName value="{{ (isset($subcategory)) ? $subcategory->SBCT_ARBC_NAME : old('arbcName')}}" >
                         </div>
                         <small class="text-danger">{{$errors->first('arbcName')}}</small>
                     </div>
@@ -54,22 +54,15 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Icon</label>
+                        <label>Description</label>
                         <div class="input-group mb-3">
-                            <select name=icon class="select2 form-control custom-select" style="width: 100%; height:36px;" required>
-                                <option value="" disabled selected >Pick From Icons</option>
-                                @foreach($icons as $icon)
-                                <option value="{{ $icon->id }}"
-                                @if(isset($subcategory) && $icon->id == $subcategory->SBCT_ICON_ID)
-                                    selected
-                                @endif
-                                >{{$icon->ICON_NAME}}</option>
-                                @endforeach
-                            </select>
+                           <textarea class="form-control" rows="3" name="desc">{{ (isset($subcategory)) ? $subcategory->SBCT_DESC : old('desc') }}</textarea>
                         </div>
-                        <small class="text-danger">{{$errors->first('icon')}}</small>
+                
+                        <small class="text-danger">{{$errors->first('desc')}}</small>
                     </div>
-                    
+            
+
                     
 
                     <button type="submit" class="btn btn-success mr-2">Submit</button>
@@ -96,7 +89,7 @@
                     <div class="form-group">
                         <label>Arabic Name*</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Arabic Category Name" name=arbcName value="{{ (isset($category)) ? $category->CATG_ARBC_NAME : old('arbcName')}}" required>
+                            <input type="text" class="form-control" placeholder="Arabic Category Name" name=arbcName value="{{ (isset($category)) ? $category->CATG_ARBC_NAME : old('arbcName')}}" >
                         </div>
                         <small class="text-danger">{{$errors->first('arbcName')}}</small>
                     </div>

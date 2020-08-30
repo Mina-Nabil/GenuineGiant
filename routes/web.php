@@ -65,26 +65,22 @@ Route::post('products/subcategory', 'ProductsController@showSubCategory');
 Route::get('products/show/catg/sub/{id}', 'ProductsController@home');
 Route::get('products/details/{id}', 'ProductsController@details');
 Route::get('products/add', 'ProductsController@add');
-Route::post('producs/add/image/{id}', 'ProductsController@attachImage');
-Route::get('products/setimage/{prodID}/{imageID}', 'ProductsController@setMainImage');
-Route::post('products/setchart/{prodID}', 'ProductsController@setChartImage');
-Route::get('products/unsetchart/{prodID}', 'ProductsController@unsetChartImage');
-Route::post('products/delete/image/{id}', 'ProductsController@deleteImage');
-Route::post('products/linktags/{id}', 'ProductsController@linkTags');
 Route::post('products/insert', 'ProductsController@insert');
 Route::get('products/edit/{id}', 'ProductsController@edit');
 Route::post('products/update', 'ProductsController@update');
+Route::post('products/ingredients/add/{id}', 'ProductsController@addIngredients');
+Route::get('products/ingredients/delete/{id}', 'ProductsController@deleteIngredient');
 
 
-//Users
-Route::get('users/show/all','UsersController@home');
-Route::get('users/show/latest','UsersController@latest');
-Route::get('users/show/top', 'UsersController@top');
-Route::get('users/edit/{id}', 'UsersController@edit');
-Route::get('users/add', 'UsersController@add');
-Route::get('users/profile/{id}', 'UsersController@profile');
-Route::post('users/insert', 'UsersController@insert');
-Route::post('users/update', 'UsersController@update');
+//Clients
+Route::get('clients/show/all','ClientsController@home');
+Route::get('clients/show/latest','ClientsController@latest');
+Route::get('clients/show/top', 'ClientsController@top');
+Route::get('clients/edit/{id}', 'ClientsController@edit');
+Route::get('clients/add', 'ClientsController@add');
+Route::get('clients/profile/{id}', 'ClientsController@profile');
+Route::post('clients/insert', 'ClientsController@insert');
+Route::post('clients/update', 'ClientsController@update');
 
 //Payment Options
 Route::get('paymentoptions/show', 'PaymentOptionsController@home');
@@ -105,35 +101,12 @@ Route::post('areas/insert', 'AreasController@insert');
 Route::post('areas/update', 'AreasController@update');
 
 //Tags
-Route::get('tags/show', 'TagsController@home');
-Route::get('tags/edit/{id}', 'TagsController@edit');
-Route::post('tags/insert', 'TagsController@insert');
-Route::post('tags/update', 'TagsController@update');
+Route::get('rawmaterials/show', 'RawMaterialsController@home');
+Route::get('rawmaterials/edit/{id}', 'RawMaterialsController@edit');
+Route::post('rawmaterials/insert', 'RawMaterialsController@insert');
+Route::post('rawmaterials/update', 'RawMaterialsController@update');
 
-//Colors
-Route::get('colors/show', 'ColorsController@home');
-Route::get('colors/edit/{id}', 'ColorsController@edit');
-Route::post('colors/insert', 'ColorsController@insert');
-Route::post('colors/update', 'ColorsController@update');
 
-//Icons
-Route::get('icons/show', 'IconsController@home');
-Route::get('icons/edit/{id}', 'IconsController@edit');
-Route::post('icons/insert', 'IconsController@insert');
-Route::post('icons/update', 'IconsController@update');
-
-//Sizes
-Route::get('sizes/show', 'SizesController@home');
-Route::get('sizes/edit/{id}', 'SizesController@edit');
-Route::post('sizes/insert', 'SizesController@insert');
-Route::post('sizes/update', 'SizesController@update');
-
-//Charts
-Route::get('charts/show', 'ChartsController@home');
-Route::get('charts/edit/{id}', 'ChartsController@edit');
-Route::get('charts/toggle/{id}', 'ChartsController@toggle');
-Route::post('charts/insert', 'ChartsController@insert');
-Route::post('charts/update', 'ChartsController@update');
 
 //Categories
 Route::get('categories/show', 'CategoriesController@home');

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCLNTsTable extends Migration
+class CreateClientsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -25,11 +25,10 @@ class CreateCLNTsTable extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string("CLNT_NAME");
-            $table->string("CLNT_MAIL")->unique();
             $table->string("CLNT_ADRS")->nullable();
             $table->foreignId("CLNT_AREA_ID")->nullable()->constrained("areas");
             $table->string("CLNT_MOBN");
-            $table->string("CLNT_PASS")->nullable();
+            $table->double("CLNT_BLNC")->default(0);
             $table->timestamps();
         });
     }

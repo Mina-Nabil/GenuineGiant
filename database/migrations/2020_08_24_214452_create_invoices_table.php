@@ -13,8 +13,12 @@ class CreateInvoicesTable extends Migration
      */
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('invoices', function (Blueprint $table) { //raw material invoice
             $table->id();
+            $table->foreignID("INVC_SUPP_ID")->constrained("suppliers");
+            $table->string("INVC_DESC");
+            $table->string("INVC_CMNT")->nullable();
+            $table->string("INVC_TOTL")->nullable();
             $table->timestamps();
         });
     }

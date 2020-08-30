@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Color;
+use App\Models\Ingredient;
 use App\Models\Inventory;
 use App\Models\Product;
-use App\Models\ProductImages;
-use App\Models\SizeChart;
+use App\Models\RawMaterial;
 use App\Models\SubCategory;
-use App\Models\Tags;
-use DateInterval;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +26,7 @@ class ProductsController extends Controller
 
     ///////////////////Models Pages
 
-    public function home($sub=-1)
+    public function home($sub = -1)
     {
         $this->initTableArr(-1, $sub);
         return view("products.table", $this->data);
@@ -94,7 +90,7 @@ class ProductsController extends Controller
 
     public function details($prodID)
     {
-        $product = Product::with("mainImage", "images", "tags", "sizechart", "stock", "subcategory")->where("id", $prodID)->get()->first();
+        $product = Product::with("stock", "subcategory")->where("id", $prodID)->get()->first();
 
         if (isset($product->mainImage->id))
             $this->data['mainImage'] = $product->mainImage->PIMG_URL;
@@ -104,99 +100,65 @@ class ProductsController extends Controller
             $this->data['mainImage'] = asset('images/default_product.jpg');
 
         $this->data['categories'] = SubCategory::with('category')->get();
+        $this->data['raw'] = RawMaterial::all();
         $this->data['formURL'] = "products/update";
         $this->data['formTitle'] = "Edit Model Info";
         $this->data['isCancel'] = true;
         $this->data['homeURL'] = $this->homeURL;
+        $this->data['addIngredients'] = url('products/ingredients/add/' . $product->id);
 
 
-        $this->data['items'] = Inventory::with(["product", "color", "size"])->where("INVT_PROD_ID", "=", $prodID)->get();
+        $this->data['items'] = Inventory::with(["product"])->where("INVT_PROD_ID", "=", $prodID)->get();
 
         $this->data['title'] = "Items Available";
         $this->data['subTitle'] = "View Current Stock for (" . $product->PROD_NAME . ")";
-        $this->data['cols'] = ['Color', 'Size', 'Count'];
-        $this->data['atts'] = [ 
-            // ['foreignUrl' => ['products/profile', 'INVT_PROD_ID', 'product', 'PROD_NAME']],
-            ['foreign' => ['color','COLR_NAME']], 
-            ['foreign' => ['size','SIZE_NAME']], 
+        $this->data['cols'] = ['Production Date', 'Amount'];
+        $this->data['atts'] = [
+            ['date' => ['att' => 'created_at', 'format' => "Y-M-d"]],
+            ['number' => ['att' => 'INVT_AMNT', 'nums' => 2]],
             'INVT_CUNT'
         ];
-
-        $this->data['imageFormURL'] =   "producs/add/image/" . $product->id;
-        $this->data['colors']       =   Color::all();
-
-        $this->data['chartFormURL'] =   "products/setchart/" . $product->id;
-        $this->data['removeChartURL'] =   "products/unsetchart/" . $product->id;
-        $this->data['charts']       =   SizeChart::all();
-
-        $this->data['tagsFormURL'] =   "products/linktags/" . $product->id;
-        $this->data['prodTagIDs'] = $product->tags->pluck('id')->all();
-
-        $this->data['tags']       =   Tags::all();
+        //raw materials
+        $this->data['rawItems'] = $product->ingredients()->get();
+        $this->data['rawTitle'] = "Product Ingrediets";
+        $this->data['rawSubTitle'] = "View Ingredients for (" . $product->PROD_NAME . ")";
+        $this->data['rawCols'] = ['Raw Material', 'Amount', 'Delete'];
+        $this->data['rawAtts'] = [
+            ['foreign' => ['raw_material', 'RWMT_NAME']],
+            ['number' => ['att' => 'IGDT_GRAM', 'nums' => 0]],
+            ['del' => ['url' => 'products/ingredients/delete/', 'att' => 'id']],
+        ];
 
         $this->data['product'] = $product;
         return view("products.details", $this->data);
     }
 
-    public function attachImage($prodId, Request $request)
-    {
-        $product = Product::findOrFail($prodId);
-        $request->validate([
-            "color" => "required|exists:colors,id",
-            "uploadedImage" => "activeUrl"
-        ]);
-        $newImage = new ProductImages();
-        $newImage->PIMG_URL = $request->uploadedImage;
-        $newImage->PIMG_COLR_ID = $request->color;
-        $newImage->PIMG_PROD_ID = $prodId;
-
-        $newImage->save();
-        return redirect('products/details/' . $prodId);
-    }
-
-    public function setMainImage($prodID, $imageID)
+    public function addIngredients($prodID, Request $request)
     {
         $product = Product::findOrFail($prodID);
-        $product->PROD_PIMG_ID = $imageID;
-        $product->save();
+        $ingredients = $this->getIngredientsItemsObjectArray($product->id, $request);
+        $product->ingredients()->saveMany($ingredients);
         return redirect('products/details/' . $prodID);
     }
 
-    public function setChartImage($prodID, Request $request)
-    {
-        $product = Product::findOrFail($prodID);
-        $request->validate([
-            'chart' => "required|exists:size_chart,id"
-        ]);
-        $product->PROD_SZCT_ID = $request->chart;
-        $product->save();
+    public function deleteIngredient($id){
+        $ingredient = Ingredient::findOrFail($id);
+        $prodID = $ingredient->IGDT_PROD_ID;
+        $ingredient->delete();
         return redirect('products/details/' . $prodID);
     }
 
-    public function unsetChartImage($prodID)
-    {
-        $product = Product::findOrFail($prodID);
-        $product->PROD_SZCT_ID = NULL;
-        $product->save();
-        return redirect('products/details/' . $prodID);
-    }
 
-    public function linkTags($prodID, Request $request)
-    {
-        $product = Product::findOrFail($prodID);
-        $product->tags()->sync($request->tags);
-        return redirect('products/details/' . $prodID);
-    }
-
+    ////////////////////////////////REST Function///////////////////////////
     public function insert(Request $request)
     {
         $request->validate([
             "name" => "required|unique:products,PROD_NAME",
-            "arbcName" => "required",
             "desc" => "required",
-            "arbcDesc" => "required",
             "category" => "required|exists:sub_categories,id",
-            "price" => "required|numeric",
+            "wholePrice" => "required|numeric",
+            "retailPrice" => "required|numeric",
+            "insidePrice" => "required|numeric",
             "cost" => "nullable|numeric",
         ]);
 
@@ -207,17 +169,15 @@ class ProductsController extends Controller
         $product->PROD_DESC = $request->desc;
         $product->PROD_ARBC_DESC = $request->arbcDesc;
         $product->PROD_SBCT_ID = $request->category;
-        $product->PROD_PRCE = $request->price;
-        $product->PROD_BRCD = $request->barCode;
+        $product->PROD_RETL_PRCE = $request->retailPrice;
+        $product->PROD_WHLE_PRCE = $request->wholePrice;
+        $product->PROD_INSD_PRCE = $request->insidePrice;
         $product->PROD_COST = $request->cost;
-        if (isset($product->offer))
-            $product->PROD_OFFR = $request->offer;
+
 
         $product->save();
         return redirect('products/details/' . $product->id);
     }
-
-    ////////////////////////////////REST Function///////////////////////////
 
     public function update(Request $request)
     {
@@ -227,9 +187,11 @@ class ProductsController extends Controller
         $product = Product::findOrFail($request->id);
         $request->validate([
             "name"          => ["required",  Rule::unique('products', "PROD_NAME")->ignore($product->PROD_NAME, "PROD_NAME"),],
-            "arbcName" => "required",
+            "desc" => "required",
             "category" => "required|exists:sub_categories,id",
-            "price" => "required|numeric",
+            "wholePrice" => "required|numeric",
+            "retailPrice" => "required|numeric",
+            "insidePrice" => "required|numeric",
             "cost" => "nullable|numeric",
         ]);
 
@@ -238,11 +200,11 @@ class ProductsController extends Controller
         $product->PROD_DESC = $request->desc;
         $product->PROD_ARBC_DESC = $request->arbcDesc;
         $product->PROD_SBCT_ID = $request->category;
-        $product->PROD_PRCE = $request->price;
-        $product->PROD_BRCD = $request->barCode;
+        $product->PROD_RETL_PRCE = $request->retailPrice;
+        $product->PROD_WHLE_PRCE = $request->wholePrice;
+        $product->PROD_INSD_PRCE = $request->insidePrice;
         $product->PROD_COST = $request->cost;
-        if (isset($product->offer))
-            $product->PROD_OFFR = $request->offer;
+
 
         $product->save();
         return redirect('products/details/' . $product->id);
@@ -250,7 +212,7 @@ class ProductsController extends Controller
 
 
     //////////////////Initializing Data Arrays
-    private function initTableArr($category = -1, $subcategory = -1, $sale=-1, $newArrivals=-1)
+    private function initTableArr($category = -1, $subcategory = -1, $sale = -1, $newArrivals = -1)
     {
         if ($category != -1) {
 
@@ -258,41 +220,32 @@ class ProductsController extends Controller
             $category = Category::findOrFail($category);
             $this->data['title'] = $category->CATG_NAME . "'s Models";
             $this->data['subTitle'] = "Showing all Models for " . $category->CATG_NAME;
-
         } elseif ($subcategory != -1) {
 
             $this->data['items'] = Product::all();
-            $subcategory=SubCategory::findOrFail($subcategory);
+            $subcategory = SubCategory::findOrFail($subcategory);
             $this->data['title'] = $subcategory->SBCT_NAME . "'s Models";
             $this->data['subTitle'] = "Showing all Models for " . $subcategory->SBCT_NAME;
-
-        } else if ($sale != -1){
-            $this->data['items'] = Product::with('stock')->where("PROD_OFFR", "<>", 0)->get();
-            $this->data['title'] =  "On Sale";
-            $this->data['subTitle'] = "Showing all Models currently on sale ";
-        } else if ($newArrivals != -1){
-            $this->data['items'] = Product::newArrivals("P1M"); // 1 month
-            $this->data['title'] =  "New Arrivals";
-            $this->data['subTitle'] = "Showing Models Newly created during the last month ";
         } else {
 
             $this->data['items'] = Product::withCount('stock')->get();
             $this->data['title'] = "All Models";
             $this->data['subTitle'] = "Showing all Models";
-
         }
-        $this->data['cols'] = ['Barcode', 'Model Title', 'Arabic Title', "in Stock", 'Price', 'Cost', 'Offer', 'Edit'];
+        $this->data['cols'] = ['Model Title', 'Arabic Title', "in Stock", 'Retail Price', 'Whole Price', 'Inside Price', 'Cost', 'Offer', 'Edit'];
         $this->data['atts'] = [
-            'PROD_BRCD',
+
             ['attUrl' => ['url' => 'products/details', 'urlAtt' => "id", "shownAtt" => "PROD_NAME"]],
             ['attUrl' => ['url' => 'products/details', 'urlAtt' => "id", "shownAtt" => "PROD_ARBC_NAME"]],
-            (($newArrivals == -1) ? ['sumForeign' => ['rel'=>"stock", "att"=>"INVT_CUNT"]] : "stock"),
-            'PROD_PRCE',
+            ['sumForeign' => ['rel' => "stock", "att" => "INVT_KMS"]],
+            ['number' => ['att' => 'PROD_RETL_PRCE', 'nums' => 2],],
+            ['number' => ['att' => 'PROD_WHLE_PRCE', 'nums' => 2],],
+            ['number' => ['att' => 'PROD_INSD_PRCE', 'nums' => 2],],
             'PROD_COST',
             'PROD_OFFR',
             ['edit' => ['url' => 'products/edit/', 'att' => 'id']],
         ];
-       // dd($this->data['items'][0]->stock_count);
+        // dd($this->data['items'][0]->stock_count);
         $this->data['homeURL'] = $this->homeURL;
     }
 
@@ -308,5 +261,17 @@ class ProductsController extends Controller
         $this->data['formTitle'] = "Add New Model";
         $this->data['isCancel'] = true;
         $this->data['homeURL'] = $this->homeURL;
+    }
+
+    private function getIngredientsItemsObjectArray($prodID, Request $request)
+    {
+        $retArr = array();
+        foreach ($request->item as $index => $item) {
+            array_push($retArr, new Ingredient(
+                ["IGDT_RWMT_ID" => $item, "IGDT_GRAM" => $request->grams[$index]]
+            ));
+        }
+  
+        return $retArr;
     }
 }

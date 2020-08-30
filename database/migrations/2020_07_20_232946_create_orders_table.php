@@ -39,8 +39,7 @@ class CreateOrdersTable extends Migration
             $table->double("ORDR_TOTL");
             $table->string("ORDR_NOTE")->nullable();
             $table->double("ORDR_PAID")->default(0);
-            $table->unsignedInteger("ORDR_DASH_CLCT")->nullable();
-            $table->foreign("ORDR_DASH_CLCT")->references("id")->on("dash_users");
+            $table->foreignId("ORDR_DASH_CLCT")->constrained("dash_users"); 
             $table->timestamps();
         });
 

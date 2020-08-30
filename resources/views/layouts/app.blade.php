@@ -11,9 +11,10 @@
     <meta name="csrf-token" content="{{ Session::token() }}">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/whaleLogo.png') }}">
-    <title>{{  config('app.name', 'Whale') }}</title>
+    <title>{{  config('app.name', 'GenuineGiant') }}</title>
     <!-- Custom CSS -->
     <link href="{{asset('dist/css/style.min.css')}}" rel="stylesheet">
+    <link href="{{asset('dist/css/fonts/cheltenham/style.css')}}" rel="stylesheet">
     <link href="{{asset('dist/css/style.min.css')}}" media=print rel="stylesheet">
     <!-- Datatable CSS -->
     <link href="{{ asset('assets/node_modules/datatables/media/css/dataTables.bootstrap4.css') }}" rel="stylesheet">
@@ -68,20 +69,23 @@
                         <!-- Logo icon --><b>
                             <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
                             <!-- Dark Logo icon -->
-                            <img src="{{ asset('images/whaleLogo.png') }}" height=70px alt="homepage" class="dark-logo" />
+                            <img src="{{ asset('images/genuine.png') }}" height=70px alt="homepage" class="dark-logo" />
                             <!-- Light Logo icon -->
-                            <img src="{{ asset('images/whaleLogo.png') }}" height=70px alt="homepage" class="light-logo" />
+                            <img src="{{ asset('images/genuine.png') }}" height=70px alt="homepage" class="light-logo" />
                         </b>
                         <!--End Logo icon -->
                         <!-- Logo text --><span>
 
-                            <h4 class="text-themecolor" style="text-align: center; font-family: 'Oregano' ; font-size:33px ; display: inline; ">Whale</h4>
+                            <h4 class="text-themecolor"
+                                style="text-align: center; top: 60%;font-family: 'ITC Cheltenham Std Bold Condensed' ; transform: translateY(-50%); font-size:25px ; display: inline;   position: absolute;  color:#059248"
+                                class="dark-text"> Dashboard</h4>
+
 
                             <!-- dark Logo text -->
                             {{-- <img src="{{ asset('images/dark-text.png') }}" height=40px alt="homepage" class="dark-logo" /> --}}
                             <!-- Light Logo text -->
-                            {{-- <img src="{{ asset('images/light-text.png') }}" height=40px class="light-logo" alt="homepage" />
-                        </span> </a> --}}
+                            {{-- <img src="{{ asset('images/light-text.png') }}" height=40px class="light-logo" alt="homepage" /> --}}
+                        </span> </a>
                 </div>
                 <!-- ============================================================== -->
                 <!-- End Logo -->
@@ -127,8 +131,8 @@
                 <!-- User Profile-->
                 <div class="user-profile">
                     <div class="user-pro-body">
-                        @if(isset(Auth::user()->image))
-                        <div><img src="{{ asset( 'storage/'. Auth::user()->image ) }} " alt="user-img" class="img-circle"></div>
+                        @if(isset(Auth::user()->DASH_IMGE))
+                        <div><img src="{{ asset( 'storage/'. Auth::user()->DASH_IMGE ) }} " alt="user-img" class="img-circle"></div>
                         @else
                         <div><img src="{{ asset('assets/images/users/def-user.png') }} " alt="user-img" class="img-circle"></div>
                         @endif
@@ -147,38 +151,12 @@
                 <!-- Sidebar navigation-->
                 <nav class="sidebar-nav">
                     <ul id="sidebarnav">
-
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cart-plus"></i><span class="hide-menu">Orders</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('orders/active')}}">Active Orders</a></li>
                                 <li><a href="{{url('orders/month')}}">Current Month</a></li>
                                 <li><a href="{{url('orders/load/history')}}">History</a></li>
                                 <li><a href="{{url('orders/add')}}">Place an Order</a></li>
-                            </ul>
-
-
-                        </li>
-
-
-                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-list"></i><span class="hide-menu"> Catalogue</span></a>
-                            <ul aria-expanded="false" class="collapse">
-
-                                <li>
-                                    <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Products</a>
-                                    <ul aria-expanded="false" class="collapse">
-                                        <li><a href="{{url('products/show/all')}}">All Products</a></li>
-                                        <li><a href="{{url('products/filter/category')}}">By Category</a></li>
-                                        <li><a href="{{url('products/add')}}">Add a Product</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Special Products</a>
-                                    <ul aria-expanded="false" class="collapse">
-                                        <li><a href="{{url('products/new')}}">New Arrivals</a></li>
-                                        <li><a href="{{url('products/sale')}}">For Sale</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="{{url('categories/show')}}">Categories</a></li>
                             </ul>
                         </li>
 
@@ -191,54 +169,69 @@
                             </ul>
                         </li>
 
-                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chart-bar"></i><span class="hide-menu"> Reports</span></a>
-                            <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('suppliers/trans/prepare')}}">Inventory</a></li>
-                                <li><a href="{{url('suppliers/trans/quick')}}">Sales</a></li>
-                                <li><a href="{{url('suppliers/show')}}">Users</a></li>
-                            </ul>
-                        </li>
-
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Clients</span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('users/show/latest')}}">Latest Clients</a></li>
-                                {{-- <li><a href="{{url('users/show/top')}}">Top Customers</a></li> --}}
-                                <li><a href="{{url('users/show/all')}}">Show All</a></li>
-                                <li><a href="{{url('users/add')}}">Add User</a></li>
-                            </ul>
-                        </li>
+                                <li><a href="{{url('clients/show/latest')}}">Latest Clients</a></li>
+                                {{-- <li><a href="{{url('clients/show/top')}}">Top Customers</a>
+                        </li> --}}
+                        <li><a href="{{url('clients/show/all')}}">Show All</a></li>
+                        <li><a href="{{url('clients/add')}}">Add Client</a></li>
+                    </ul>
+                    </li>
 
-                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cogs"></i><span class="hide-menu"> Website Data </span></a>
-                            <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('images/show')}}">Website Images</a></li>
-                                <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Delivery</a>
-                                    <ul aria-expanded="false" class="collapse">
-                                        <li><a href="{{url('areas/show')}}">Areas</a></li>
-                                        <li><a href="{{url('drivers/show')}}">Drivers</a></li>
-                                    </ul>
-                                </li>          
-                                <li>
-                                    <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Models</a>
-                                    <ul aria-expanded="false" class="collapse">
-                                        <li><a href="{{url('colors/show')}}">Colors</a></li>
-                                        <li><a href="{{url('sizes/show')}}">Sizes</a></li>
-                                        <li><a href="{{url('charts/show')}}">Size Charts</a></li>
-                                        <li><a href="{{url('tags/show')}}">Tags</a></li>
-                                    </ul>
-                                </li>
-                                <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Categories</a>
-                                    <ul aria-expanded="false" class="collapse">
-                                        <li><a href="{{url('icons/show')}}">Icons</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
-                            </ul>
-                        </li>
+                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chart-bar"></i><span class="hide-menu"> Reports</span></a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a href="{{url('suppliers/trans/prepare')}}">Inventory</a></li>
+                            <li><a href="{{url('suppliers/trans/quick')}}">Sales</a></li>
+                            <li><a href="{{url('suppliers/show')}}">Users</a></li>
+                        </ul>
+                    </li>
 
 
-                        <li> <a href="{{url('dash/users/all')}}"><i class=" fas fa-users"></i><span class="hide-menu">Dashboard Admins</span></a>
+                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-list"></i><span class="hide-menu"> Catalogue</span></a>
+                        <ul aria-expanded="false" class="collapse">
 
-                        </li>
+                            <li>
+                                <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Products</a>
+                                <ul aria-expanded="false" class="collapse">
+                                    <li><a href="{{url('products/show/all')}}">All Products</a></li>
+                                    <li><a href="{{url('products/filter/category')}}">By Category</a></li>
+                                    <li><a href="{{url('products/add')}}">Add a Product</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="{{url('categories/show')}}">Categories</a></li>
+                        </ul>
+                    </li>
+                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Suppliers</span></a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a href="{{url('suppliers/show/all')}}">Show All</a></li>
+                            <li><a href="{{url('suppliers/add')}}">Add Supplier</a></li>
+                        </ul>
+                    </li>
+
+
+
+                    <li>
+                        <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-flask"></i><span class="hide-menu"> Raw Materials</span></a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a href="{{url('rawmaterials/current/stock')}}"> Stock</a></li>
+                            <li><a href="{{url('rawmaterials/new/entry')}}"> New Entry</a></li>
+                            <li><a href="{{url('rawmaterials/show')}}">Show All</a></li>
+                        </ul>
+                    </li>
+
+                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cogs"></i><span class="hide-menu"> Settings </span></a>
+                        <ul aria-expanded="false" class="collapse">
+                            <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Delivery</a>
+                                <ul aria-expanded="false" class="collapse">
+                                    <li><a href="{{url('areas/show')}}">Areas</a></li>
+                                    <li><a href="{{url('drivers/show')}}">Drivers</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
+                        </ul>
+                    </li>
+                    <li> <a href="{{url('dash/users/all')}}"><i class=" fas fa-users"></i><span class="hide-menu">Dashboard Admins</span></a></li>
 
                     </ul>
                 </nav>
@@ -262,14 +255,14 @@
                 <!-- ============================================================== -->
                 <div class="row page-titles">
                     <div class="col-md-5 align-self-center">
-                        <h4 class="text-themecolor" style="font-family: 'Oregano' ; font-size:33px">Whale Dashboard</h4>
+                        <h4 class="text-themecolor" style="font-family: 'Oregano' ; font-size:33px">{{config('app.name', 'GenuineGiant')}} Management System</h4>
                     </div>
                     <div class="col-md-7 align-self-center text-right">
                         <div class="d-flex justify-content-end align-items-center">
-                            <a style="font-family: 'Oswald'" href="{{url('products/add')}}" class="btn btn-info d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Product</a>
-                            <a style="font-family: 'Oswald'" href="{{url('categories/show')}}" class="btn btn-info d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Category</a>
-                            <a style="font-family: 'Oswald'" href="{{url('orders/show/active')}}" class="btn btn-info d-none d-lg-block m-l-15"><i class="fas fa-info-circle"></i> Check Orders </a>
-                            <a style="font-family: 'Oswald'" href="{{url('users/add')}}" class="btn btn-info d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add User</a>
+                            <a style="font-family: 'Oswald'" href="{{url('products/add')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Product</a>
+                            <a style="font-family: 'Oswald'" href="{{url('categories/show')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Category</a>
+                            <a style="font-family: 'Oswald'" href="{{url('orders/show/active')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fas fa-info-circle"></i> Check Orders </a>
+                            <a style="font-family: 'Oswald'" href="{{url('clients/add')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add User</a>
                         </div>
                     </div>
                 </div>
