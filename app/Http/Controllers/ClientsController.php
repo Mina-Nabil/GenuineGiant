@@ -7,6 +7,7 @@ use App\Models\Gender;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Client;
+use App\Models\ClientPayments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -38,7 +39,6 @@ class ClientsController extends Controller
             'CLNT_MOB',
             ['number' => ['att' => 'CLNT_BLNC']],
             ['foreign' => ['area', 'AREA_NAME']],
-            // ['sumForeign' => ['rel' => 'orders', 'att' => 'ORDR_TOTL']],
             ['date' => ['att' => 'created_at', 'format' => 'Y-M-d']],
             ['edit' => ['url' => 'clients/edit/', 'att' => 'id']]
         ];
@@ -80,6 +80,7 @@ class ClientsController extends Controller
                         "3" =>  "label-dark bg-dark",
                         "4" =>  "label-success",
                         "5" =>  "label-danger",
+                        "6" =>  "label-primary",
                     ],
                     "att"           =>  "ORDR_STTS_ID",
                     'foreignAtt'    => "STTS_NAME",
@@ -93,15 +94,39 @@ class ClientsController extends Controller
             'ORDR_TOTL'
         ];
 
+        //Pay table
+        $this->data['pays'] = ClientPayments::where('CLPY_CLNT_ID', '=', $this->data['client']->id)
+            ->orderByDesc('id')->get();
+        $this->data['payTitle'] = "Payments";
+        $this->data['paySubtitle'] = "Check client transactions for " . $this->data['client']->CLNT_NAME;
+        $this->data['payCols'] = ['Date', 'Paid By', 'Amount', 'Balance', 'Comment'];
+        $this->data['payAtts'] = [
+            ['date' => ['att' => 'created_at']],
+            ['foreign' => ['dash_user', 'DASH_USNM']],
+            ["number" => ['att' => 'CLPY_PAID', 'nums' => 2]],
+            ["number" => ['att' => 'CLPY_BLNC', 'nums' => 2]],
+            ["comment" => ['att' => 'CLPY_CMNT']],
+        ];
+
+        //Totals Sales
+        $this->data['totalGraphs'] =  [];
+        $this->data['totalTotals'] =  [];
+        $this->data['totalCardTitle'] =  "Total Revenue";
+        $this->data['totalTitle'] =  "Overall Sales Total";
+        $this->data['totalSubtitle'] =  "Check total money recieved and number of items sold";
+
         //Items Bought
         $this->data['boughtList'] = $this->data['client']->itemsBought();
-        $this->data['boughtCols'] = ['Model', 'Color', 'Size', 'Count'];
+        $this->data['boughtCols'] = ['Model', 'Price', 'KGs'];
         $this->data['boughtAtts'] = [
             'PROD_NAME',
-            'COLR_NAME',
-            'SIZE_NAME',
-            'itemCount'
+            'ORIT_PRCE',
+            'ORIT_KGS'
         ];
+
+        //payment form
+        $this->data['formTitle'] = "Add Client Payment";
+        $this->data['formURL'] = url('clients/pay');
     }
 
     public function home()
@@ -138,6 +163,19 @@ class ClientsController extends Controller
     {
         $this->initProfileArr($id);
         return view("clients.profile", $this->data);
+    }
+
+    public function pay(Request $request)
+    {
+        $request->validate([
+            "amount"         => "required|numeric",
+            "id"             => "required|exists:clients,id",
+        ]);
+
+        $client = Client::findOrFail($request->id);
+        $client->pay($request->amount, $request->comment);
+
+        return redirect("clients/profile/" . $client->id);
     }
 
     public function insert(Request $request)

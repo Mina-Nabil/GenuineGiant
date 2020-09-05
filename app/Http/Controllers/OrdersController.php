@@ -118,6 +118,7 @@ class OrdersController extends Controller
         $data['setOrderCancelledUrl']       =   url('orders/set/cancelled/' . $data['order']->id);
         $data['setOrderDeliveredUrl']       =   url('orders/set/delivered/' . $data['order']->id);
         $data['linkNewReturnUrl']           =   url('orders/create/return/' . $data['order']->id);
+        $data['settleOrderOnBalance']           =   url('orders/settle/payment/' . $data['order']->id);
         $data['returnUrl']                  =   url('orders/return/' . $data['order']->id);
 
         //Add Items Panel
@@ -138,7 +139,7 @@ class OrdersController extends Controller
         $data['areas']                  = Area::where('AREA_ACTV', 1)->get();
         $data['editInfoURL']             =   url('orders/edit/details');
 
-        $data['remainingMoney']         =   $data['order']->ORDR_TOTL - $data['order']->ORDR_PAID - $data['order']->ORDR_DISC;
+        $data['remainingMoney']         =   $data['order']->ORDR_TOTL - $data['order']->ORDR_PAID - $data['order']->ORDR_DISC - $data['order']->ORDR_CLNT_BLNC;
 
         return view("orders.details", $data);
     }
@@ -237,7 +238,7 @@ class OrdersController extends Controller
     {
         $order = Order::findOrFail($id);
         DB::transaction(function () use ($order) {
-            $remainingMoney = $order->ORDR_TOTL - $order->ORDR_DISC - $order->ORDR_PAID;
+            $remainingMoney = $order->ORDR_TOTL - $order->ORDR_DISC - $order->ORDR_PAID - $order->ORDR_CLNT_BLNC;
             if ($order->ORDR_STTS_ID == 3 && $remainingMoney == 0) {
                 $order->ORDR_STTS_ID = 4;
                 $order->ORDR_DLVR_DATE = date('Y-m-d H:i:s');
@@ -290,6 +291,7 @@ class OrdersController extends Controller
             $retOrder->ORDR_AREA_ID = $order->ORDR_AREA_ID;
             $retOrder->ORDR_PYOP_ID = $order->ORDR_PYOP_ID;
             $retOrder->ORDR_STTS_ID = 6; // new returned order
+            $retOrder->ORDR_DASH_ID = Auth::user()->id; // new return order
             $retOrder->ORDR_TOTL = 0;
             $retOrder->save();
             $order->ORDR_RTRN_ID = $retOrder->id; // new returned order
@@ -366,6 +368,21 @@ class OrdersController extends Controller
             $order->addTimeline("Discount added on order, discount now is set to " . $order->ORDR_DISC);
         });
 
+        return redirect("orders/details/" . $order->id);
+    }
+
+    public function settleFromClientBalance($id){
+        $order = Order::findOrFail($id); 
+        if(!(isset($order->ORDR_CLNT_ID) || is_numeric($order->ORDR_CLNT_ID))) {
+            abort(404);
+        }
+        $remainingMoney = $order->ORDR_TOTL - $order->ORDR_PAID - $order->ORDR_DISC - $order->ORDR_CLNT_BLNC;
+        $client = Client::findOrFail($order->ORDR_CLNT_ID);
+        DB::transaction(function () use ($client, $order, $remainingMoney){
+            $client->pay(-1*$remainingMoney, "Order Settlement", $order->id);
+            $order->ORDR_CLNT_BLNC += $remainingMoney;
+            $order->save();
+        });
         return redirect("orders/details/" . $order->id);
     }
 
@@ -453,6 +470,7 @@ class OrdersController extends Controller
                     'ORIT_INVT_ID' => $orderItem->ORIT_INVT_ID
                 ]);
                 $returnedItem->ORIT_KGS += $request->count;
+                $returnedItem->ORIT_PRCE = $request->price;
                 $returnedItem->ORIT_VRFD = 1;
                 $returnedItem->save();
                 $returnOrder->recalculateTotal();

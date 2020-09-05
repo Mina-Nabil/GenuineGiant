@@ -39,6 +39,7 @@ Route::get("orders/toggle/item/{id}", "OrdersController@toggleItem");
 Route::get("orders/delete/item/{id}", "OrdersController@deleteItem");
 Route::post("orders/edit/details", "OrdersController@editOrderInfo");
 Route::post("orders/collect/payment", "OrdersController@collectNormalPayment");
+Route::get("orders/settle/payment/{id}", "OrdersController@settleFromClientBalance");
 Route::post("orders/collect/delivery", "OrdersController@collectDeliveryPayment");
 Route::post("orders/set/discount", "OrdersController@setDiscount");
 Route::post("orders/assign/driver", "OrdersController@assignDriver");
@@ -79,6 +80,7 @@ Route::get('clients/show/top', 'ClientsController@top');
 Route::get('clients/edit/{id}', 'ClientsController@edit');
 Route::get('clients/add', 'ClientsController@add');
 Route::get('clients/profile/{id}', 'ClientsController@profile');
+Route::post('clients/pay', 'ClientsController@pay');
 Route::post('clients/insert', 'ClientsController@insert');
 Route::post('clients/update', 'ClientsController@update');
 

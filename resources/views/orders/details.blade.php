@@ -51,7 +51,7 @@
                         </div>
                         <p>
                             @if(!$order->ORDR_GEST_NAME)
-                            <a href="{{url('users/profile/' . $order->ORDR_CLNT_ID )}}">
+                            <a href="{{url('clients/profile/' . $order->ORDR_CLNT_ID )}}">
                                 @endif
                                 {{($order->ORDR_GEST_NAME) ? $order->ORDR_GEST_NAME . " (Guest)": $order->CLNT_NAME . " (User)"}}
                                 @if(!$order->ORDR_GEST_NAME)
@@ -282,11 +282,14 @@
                                                             <h5>Amount</h5>
                                                             <input type="number" step=0.01 class="form-control form-control-line" name=count value="{{$item->ORIT_KGS}}" required>
                                                         </div>
+                                                        @if(!$isPartiallyReturned)
                                                         <div class="form-group col-md-12 m-t-0">
                                                             <h5>Price</h5>
                                                             <input type="number" step=0.01 class="form-control form-control-line" name=price value="{{$item->ORIT_PRCE}}" required>
                                                         </div>
-
+                                                        @else
+                                                            <input type="hidden" name=price value="{{$item->ORIT_PRCE}}">
+                                                        @endif
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Close</button>
@@ -403,7 +406,7 @@
                 <div class="tab-pane" id="payment" role="tabpanel">
                     <div class="card-body">
                         <h4 class="card-title">Order Payments</h4>
-                        <h6 class="card-subtitle">Total: {{$order->ORDR_TOTL}} - Paid: {{$order->ORDR_PAID}} - Discount: {{$order->ORDR_DISC}} - Remaining: {{$remainingMoney}} - Delivery
+                        <h6 class="card-subtitle">Total: {{$order->ORDR_TOTL}} - Paid: {{$order->ORDR_PAID}} - Client Balance: {{$order->ORDR_CLNT_BLNC}} - Discount: {{$order->ORDR_DISC}} - Remaining: {{$remainingMoney}} - Delivery
                             {{$order->ORDR_DLFE}} </h6>
                         @if($order->ORDR_STTS_ID < 4 ) <form class="form pt-3" method="post" action="{{ url($paymentURL) }}" enctype="multipart/form-data">
                             <input type="hidden" name=id value={{$order->id}}>
@@ -415,6 +418,7 @@
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-success mr-2">Collect Normal Payment</button>
+                            <button type="button" class="btn btn-success mr-2" onclick="confirmAndGoTo('{{url($settleOrderOnBalance)}}', 'Settle Order on Client Balance')" @if($remainingMoney <= 0) disabled @endif>Settle Order on Client Balance</button>
                             </form>
                             <hr>
                             <form class="form pt-3" method="post" action="{{ url($discountURL) }}" enctype="multipart/form-data">
