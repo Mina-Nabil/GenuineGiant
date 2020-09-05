@@ -10,10 +10,10 @@ class OrderItem extends Model
     public $timestamps = false;
 
     public $fillable = [
-        "ORIT_INVT_ID", "ORIT_CUNT" 
+        "ORIT_INVT_ID", "ORIT_KGS" , 'ORIT_PRCE'
     ];
     public $attributes = [
-        "ORIT_KMS" => 0
+        "ORIT_KGS" => 0  , 'ORIT_PRCE' => 0
     ];
 
     public function order()

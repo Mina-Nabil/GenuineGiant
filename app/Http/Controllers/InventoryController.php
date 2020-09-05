@@ -20,8 +20,6 @@ class InventoryController extends Controller
     {
         //models data
         $data['products'] = Product::all();
-        $data['colors'] = Color::all();
-        $data['sizes'] = Size::all();
 
         //form data
         $data['formURL'] = 'inventory/insert/entry';
@@ -33,8 +31,8 @@ class InventoryController extends Controller
     public function insert(Request $request)
     {
         $entryArr = $this->getEntryArray($request);
-        
-        Inventory::insertEntry($entryArr );
+
+        Inventory::insertEntry($entryArr, null, false, "New Stock Entry");
 
         return redirect("inventory/current/stock");
     }
@@ -42,16 +40,36 @@ class InventoryController extends Controller
     public function stock()
     {
 
-        $data['items'] = Inventory::with(["product", "color", "size"])->get();
+        $data['items'] = Inventory::with(["product"])->get();
 
-        $data['title'] = "Stock List";
-        $data['subTitle'] = "View Current Stock";
-        $data['cols'] = ['Model', 'Color', 'Size', 'Count'];
-        $data['atts'] = [ 
+        $data['stockTitle'] = "Stock List";
+        $data['stockSubtitle'] = "View Current Stock";
+        $data['stockCols'] = ['Model', 'KGs Available', 'Retail Price', 'Whole Price', 'Inside Price', 'Cost'];
+        $data['stockAtts'] = [
             ['foreignUrl' => ['products/details', 'INVT_PROD_ID', 'product', 'PROD_NAME']],
-            ['foreign' => ['color','COLR_NAME']], 
-            ['foreign' => ['size','SIZE_NAME']], 
-            'INVT_CUNT'
+            ['number' => ['att' => 'INVT_KGS']],
+            ['foreign' => ['product', 'PROD_RETL_PRCE']],
+            ['foreign' => ['product', 'PROD_WHLE_PRCE']],
+            ['foreign' => ['product', 'PROD_INSD_PRCE']],
+            ['foreign' => ['product', 'PROD_COST']],
+        ];
+
+        $data['totalKG']        = $data['items']->sum('INVT_KGS');
+        $data['totalPrice']   = Inventory::getTotalPrice();
+        $data['totalCost']      = Inventory::getTotalCost();
+
+        //transactions
+        $data['trans'] = Inventory::getGroupedTransactions();
+        $data['transTitle'] = "Latest Inventory Entries";
+        $data['transSubtitle'] = "View the latest 500 inventory entries - Each Entry can be shown by the entry code";
+        $data['transCols'] = ['Code', 'Date', 'Done by', 'Total In', 'Total Out', "Order#"];
+        $data['transAtts'] = [
+            ['attUrl' => ['url' => 'inventory/transaction', 'shownAtt' => 'INTR_CODE', 'urlAtt' => 'INTR_CODE']],
+            "INTR_DATE",
+            'DASH_USNM',
+            'totalIn',
+            'totalOut',
+            ['dynamicUrl' => ['val' => 'INTR_ORDR_ID', 'att' => 'INTR_ORDR_ID', '0' => 'orders/details/']]
         ];
 
         return view("inventory.stock", $data);
@@ -61,20 +79,20 @@ class InventoryController extends Controller
     {
         $data['items'] = Inventory::getTransactionByCode($code);
         abort_if(!isset($data['items'][0]), 404);
-        $data['title'] = "Entry " .( (isset($data['items'][0]->INTR_CODE)) ? $data['items'][0]->INTR_CODE : "") .  " details";
-        $data['subTitle'] = "Inventory Entry Details" . ((isset($data['items'][0]->DASH_USNM)) ? " done by '" . $data['items'][0]->DASH_USNM . "'": "") . 
-        ((isset($data['items'][0]->INTR_DATE)) ? " on " . $data['items'][0]->INTR_DATE : "");
-        $data['cols'] = ['Code', 'Product', 'Color', 'Size', 'In', 'Out'];
-        $data['atts'] = [ 
+        $data['title'] = "Entry " . ((isset($data['items'][0]->INTR_CODE)) ? $data['items'][0]->INTR_CODE : "") .  " details";
+        $data['subTitle'] = "Inventory Entry Details" . ((isset($data['items'][0]->DASH_USNM)) ? " done by '" . $data['items'][0]->DASH_USNM . "'" : "") .
+            ((isset($data['items'][0]->INTR_DATE)) ? " on " . $data['items'][0]->INTR_DATE : "");
+        $data['cols'] = ['Code', 'Product', 'In', 'Out', 'Order#', "Comment"];
+        $data['atts'] = [
             "INTR_CODE",
-            ['attUrl' => ["url" => "products/profile", 'urlAtt'=>'INVT_PROD_ID', 'shownAtt'=>'PROD_NAME']], 
-            'COLR_NAME', 
-            'SIZE_NAME', 
+            ['attUrl' => ["url" => "products/profile", 'urlAtt' => 'INVT_PROD_ID', 'shownAtt' => 'PROD_NAME']],
             'INTR_IN',
             'INTR_OUT',
+            ['dynamicUrl' => ['val' => 'INTR_ORDR_ID', 'att' => 'INTR_ORDR_ID', '0' => 'orders/details/']],
+            ['comment' => ['att' => 'INTR_CMNT']]
         ];
 
-        return view("inventory.stock", $data);
+        return view("inventory.table", $data);
     }
 
     public function transactions()
@@ -82,16 +100,18 @@ class InventoryController extends Controller
         $data['items'] = Inventory::getGroupedTransactions();
         $data['title'] = "Latest Inventory Entries";
         $data['subTitle'] = "View the latest 500 inventory entries - Each Entry can be shown by the entry code";
-        $data['cols'] = ['Code', 'Date', 'Done by', 'Total In', 'Total Out'];
-        $data['atts'] = [ 
-            ['attUrl' => ['url' =>'inventory/transaction', 'shownAtt' => 'INTR_CODE', 'urlAtt' => 'INTR_CODE']],
-            "INTR_DATE", 
-            'DASH_USNM', 
+        $data['cols'] = ['Code', 'Date', 'Done by', 'Total In', 'Total Out', 'Order#', 'Comment'];
+        $data['atts'] = [
+            ['attUrl' => ['url' => 'inventory/transaction', 'shownAtt' => 'INTR_CODE', 'urlAtt' => 'INTR_CODE']],
+            "INTR_DATE",
+            'DASH_USNM',
             'totalIn',
             'totalOut',
+            ['dynamicUrl' => ['val' => 'INTR_ORDR_ID', 'att' => 'INTR_ORDR_ID', '0' => 'orders/details/']],
+            ['comment' => ['att' =>'INTR_CMNT']]
         ];
 
-        return view("inventory.stock", $data);
+        return view("inventory.table", $data);
     }
 
 
@@ -102,8 +122,6 @@ class InventoryController extends Controller
         for ($i = 0; isset($request->count[$i]); $i++) {
             $ret[$i] = [
                 "modelID" => $request->model[$i],
-                "colorID" => $request->color[$i],
-                "sizeID" => $request->size[$i],
                 "count" => $request->count[$i],
             ];
         }

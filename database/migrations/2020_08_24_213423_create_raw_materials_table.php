@@ -17,8 +17,8 @@ class CreateRawMaterialsTable extends Migration
             $table->id();
             $table->string("RWMT_NAME")->unique();
             $table->string("RWMT_ARBC_NAME")->nullable();
-            $table->double("RWMT_COST")->nullable(); //estimated cost
-            $table->double("RWMT_BLNC")->default(0); //estimated cost
+            $table->double("RWMT_COST")->nullable(); //calculated cost
+            $table->double("RWMT_BLNC")->default(0); //current balance
         });
         
         Schema::create('raw_inventory', function (Blueprint $table){

@@ -216,18 +216,17 @@ class ProductsController extends Controller
     {
         if ($category != -1) {
 
-            $this->data['items'] = Product::all();
             $category = Category::findOrFail($category);
+            $this->data['items'] = $category->products;
             $this->data['title'] = $category->CATG_NAME . "'s Models";
             $this->data['subTitle'] = "Showing all Models for " . $category->CATG_NAME;
         } elseif ($subcategory != -1) {
 
-            $this->data['items'] = Product::all();
+            $this->data['items'] = Product::where("PROD_SBCT_ID", '=', $subcategory);
             $subcategory = SubCategory::findOrFail($subcategory);
             $this->data['title'] = $subcategory->SBCT_NAME . "'s Models";
             $this->data['subTitle'] = "Showing all Models for " . $subcategory->SBCT_NAME;
         } else {
-
             $this->data['items'] = Product::withCount('stock')->get();
             $this->data['title'] = "All Models";
             $this->data['subTitle'] = "Showing all Models";

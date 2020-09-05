@@ -16,11 +16,11 @@
         <div class="card">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-3 col-xs-6 b-r"> <strong>Model Name</strong>
+                    <div class="col-md-6 col-xs-6 b-r"> <strong>Model Name</strong>
                         <br>
                         <p class="text-muted">{{$product->PROD_NAME}}</p>
                     </div>
-                    <div class="col-md-3 col-xs-6 b-r"> <strong>Arabic Name</strong>
+                    <div class="col-md-6 col-xs-6 b-r"> <strong>Arabic Name</strong>
                         <br>
                         <p class="text-muted">{{$product->PROD_ARBC_NAME}}</p>
                     </div>

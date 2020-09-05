@@ -19,7 +19,6 @@ class HomeController extends Controller
 
     public function login()
     {
-
         $data['username'] = '';
         $data['first'] = true;
         return view('auth/login', $data);

@@ -19,7 +19,7 @@ class CreateInventoryTable extends Migration
             $table->id();
             $table->foreignId("INVT_PROD_ID")->constrained("products");
             $table->foreignId("INTR_DASH_ID")->nullable()->constrained("dash_users"); //producer
-            $table->double("INVT_KMS")->default(0);
+            $table->double("INVT_KGS")->default(0);
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ class CreateInventoryTable extends Migration
     public function down()
     {
         Schema::dropIfExists('inventory');
-        Schema::dropIfExists('sizes');
+
     }
 }

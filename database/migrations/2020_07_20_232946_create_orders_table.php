@@ -39,7 +39,7 @@ class CreateOrdersTable extends Migration
             $table->double("ORDR_TOTL");
             $table->string("ORDR_NOTE")->nullable();
             $table->double("ORDR_PAID")->default(0);
-            $table->foreignId("ORDR_DASH_CLCT")->constrained("dash_users"); 
+            $table->foreignId("ORDR_DASH_CLCT")->nullable()->constrained("dash_users"); 
             $table->timestamps();
         });
 
@@ -48,7 +48,7 @@ class CreateOrdersTable extends Migration
             $table->foreignId("ORIT_ORDR_ID")->constrained("orders");
             $table->foreignId("ORIT_INVT_ID")->constrained("inventory");
             $table->tinyInteger("ORIT_PRCE");
-            $table->tinyInteger("ORIT_KMS")->default(1);
+            $table->tinyInteger("ORIT_KGS")->default(1);
         });
 
         Schema::table('inventory_transactions', function(Blueprint $table){

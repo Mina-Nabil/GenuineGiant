@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\Client;
 use DateInterval;
 use DateTime;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -84,10 +85,10 @@ class OrdersController extends Controller
 
     public function addNew()
     {
-        $this->data['inventory']    =   Inventory::with("color", "size", "product")->where("INVT_CUNT", ">", 0)->get();
+        $this->data['inventory']    =   Inventory::with("product")->get();
         $this->data['areas']        =   Area::where('AREA_ACTV', 1)->get();
         $this->data['clients']        =   Client::all();
-        $this->data['payOptions']   =  PaymentOption::all();
+        $this->data['payOptions']   =  PaymentOption::where('PYOP_ACTV', 1)->get();
         $this->data['formTitle'] = "Add New Order";
         $this->data['formURL'] = "orders/insert";
         $this->data['isCancel'] = true;
@@ -120,7 +121,7 @@ class OrdersController extends Controller
         $data['returnUrl']                  =   url('orders/return/' . $data['order']->id);
 
         //Add Items Panel
-        $data['inventory']      =   Inventory::with("color", "size", "product")->where("INVT_CUNT", ">", 0)->get();
+        $data['inventory']      =   Inventory::with("product")->get();
         $data['isCancel']       =   false;
         $data['addFormURL']     =   url('orders/add/items/' . $id);
 
@@ -151,12 +152,10 @@ class OrdersController extends Controller
                 $orderItem = $order->order_items()->firstOrNew(
                     ['ORIT_INVT_ID' => $item['ORIT_INVT_ID']]
                 );
-                $orderItem->ORIT_KMS += $item['ORIT_KMS'];
-                $orderItem->ORIT_VRFD = 0;
-                $inventory = Inventory::findOrFail($item['ORIT_INVT_ID']);
-                $inventory->INVT_CUNT -= $item['ORIT_KMS'];
+                $orderItem->ORIT_KGS    += $item['ORIT_KGS'];
+                $orderItem->ORIT_PRCE   = $item['ORIT_PRCE'];
+                $orderItem->ORIT_VRFD   = 0;
                 $orderItem->save();
-                $inventory->save();
             }
             $order->recalculateTotal();
             $order->addTimeline("New Items added to Order");
@@ -190,15 +189,16 @@ class OrdersController extends Controller
 
         $order = Order::findOrFail($id);
         DB::transaction(function () use ($order) {
-            $isReturned = true;
-            foreach ($order->order_items as $item) {
-                $inventory = Inventory::findOrfail($item->ORIT_INVT_ID);
-                $inventory->INVT_CUNT += $item->ORIT_KMS;
-                if (!$inventory->save()) {
-                    $isReturned = false;
-                    break;
-                }
-            }
+            $isReturned = Inventory::returnOrderItems($order);
+
+            // foreach ($order->order_items as $item) {
+            //     $inventory = Inventory::findOrfail($item->ORIT_INVT_ID);
+            //     $inventory->INVT_KGS += $item->ORIT_KGS;
+            //     if (!$inventory->save()) {
+            //         $isReturned = false;
+            //         break;
+            //     }
+            // }
             if ($isReturned) {
                 $order->ORDR_STTS_ID = 5;
                 $order->ORDR_PAID = 0;
@@ -252,15 +252,15 @@ class OrdersController extends Controller
     {
         $order = Order::findOrFail($id);
         DB::transaction(function () use ($order) {
-            $isReturned = true;
-            foreach ($order->order_items as $item) {
-                $inventory = Inventory::findOrfail($item->ORIT_INVT_ID);
-                $inventory->INVT_CUNT += $item->ORIT_KMS;
-                if (!$inventory->save()) {
-                    $isReturned = false;
-                    break;
-                }
-            }
+            $isReturned = Inventory::returnOrderItems($order);;
+            // foreach ($order->order_items as $item) {
+            //     $inventory = Inventory::findOrfail($item->ORIT_INVT_ID);
+            //     $inventory->INVT_KGS += $item->ORIT_KGS;
+            //     if (!$inventory->save()) {
+            //         $isReturned = false;
+            //         break;
+            //     }
+            // }
             if ($isReturned) {
                 $order->ORDR_STTS_ID = 6;
                 $order->ORDR_PAID = 0;
@@ -277,8 +277,8 @@ class OrdersController extends Controller
         $order = Order::findOrFail($id);
         $retOrder = new Order();
         DB::transaction(function () use ($order, $retOrder) {
-            if (isset($order->ORDR_USER_ID))
-                $retOrder->ORDR_USER_ID = $order->ORDR_USER_ID;
+            if (isset($order->ORDR_CLNT_ID))
+                $retOrder->ORDR_CLNT_ID = $order->ORDR_CLNT_ID;
             else {
                 $retOrder->ORDR_GEST_NAME = $order->ORDR_GEST_NAME;
                 $retOrder->ORDR_GEST_MOBN = $order->ORDR_GEST_MOBN;
@@ -374,16 +374,41 @@ class OrdersController extends Controller
 
         $item = OrderItem::findOrfail($id);
         $order = Order::findOrfail($item->ORIT_ORDR_ID);
-        if ($order->ORDR_STTS_ID != 1) { //still new
+
+        try {
+            DB::transaction(function () use ($item, $order) {
+
+                if ($order->ORDR_STTS_ID != 1) { //still new
+                    return 'failed';
+                }
+
+                $product = Product::findOrFail($item->inventory->INVT_PROD_ID);
+
+                if ($item->ORIT_VRFD) {
+                    $item->ORIT_VRFD = 0;
+                    $debug = Inventory::insertEntry(array([
+                        "modelID"   =>  $product->id,
+                        "count"     =>  $item->ORIT_KGS,
+                    ]), $item->ORIT_ORDR_ID, true, "Order (" . $order->id . ") Item unready"); //added from order
+
+                    $order->addTimeline("Item (" . $product->PROD_NAME . ") set as unready");
+                } else {
+                    $item->ORIT_VRFD = 1;
+                    Inventory::insertEntry(array([
+                        "modelID"   =>  $product->id,
+                        "count"     =>  $item->ORIT_KGS,
+                    ]), $item->ORIT_ORDR_ID, false, "Order (" . $order->id . ") Item ready");
+                    $order->addTimeline("Item (" . $product->PROD_NAME . ") set as ready");
+                }
+                $item->save();
+
+                return 1;
+            });
+        } catch (Exception $e) {
             return 'failed';
         }
-        if ($item->ORIT_VRFD) {
-            $item->ORIT_VRFD = 0;
-        } else {
-            $item->ORIT_VRFD = 1;
-        }
-        $order->addTimeline("Item set as ready");
-        return (($item->save()) ? 1 : 'failed');
+
+        return 1;
     }
 
     public function deleteItem($id)
@@ -395,12 +420,17 @@ class OrdersController extends Controller
             if ($order->ORDR_STTS_ID != 1) { //still new
                 return 'failed';
             }
-            $inventory = Inventory::findOrFail($item->ORIT_INVT_ID);
-            $inventory->INVT_CUNT += $item->ORIT_KMS;
+            $product = Product::findOrFail($item->inventory->INVT_PROD_ID);
+            if ($item->ORIT_VRFD == 1) {
+
+                Inventory::insertEntry(array([
+                    "modelID"   =>  $product->id,
+                    "count"     =>  $item->ORIT_KGS,
+                ]), $item->ORIT_ORDR_ID, true, "Order (" . $order->id . ") Item deleted");
+            }
             $item->delete();
-            $inventory->save();
             $order->recalculateTotal();
-            $order->addTimeline("Item deleted by dashboard user");
+            $order->addTimeline("Item (" . $product->PROD_NAME . ") deleted by dashboard user");
         });
         return redirect("orders/details/" . $order->id);
     }
@@ -422,28 +452,40 @@ class OrdersController extends Controller
                 $returnedItem = $returnOrder->order_items()->firstOrNew([
                     'ORIT_INVT_ID' => $orderItem->ORIT_INVT_ID
                 ]);
-                $returnedItem->ORIT_KMS += $request->count;
+                $returnedItem->ORIT_KGS += $request->count;
                 $returnedItem->ORIT_VRFD = 1;
                 $returnedItem->save();
                 $returnOrder->recalculateTotal();
 
                 //Adjust inventory
-                $inventory = Inventory::findOrFail($orderItem->ORIT_INVT_ID);
-                $inventory->INVT_CUNT += $request->count;
-                $inventory->save();
+                $product = Product::findOrFail($returnedItem->inventory->INVT_PROD_ID);
+                Inventory::insertEntry(array([
+                    "modelID"   =>  $product->id,
+                    "count"     =>  $returnedItem->ORIT_KGS,
+                ]), $returnedItem->ORIT_ORDR_ID, true, "Order (" . $order->id . ") Item returned");
 
                 //Adjust old order
-                $orderItem->ORIT_KMS -= $request->count;
-                if ($orderItem->ORIT_KMS < 1)
+                $orderItem->ORIT_KGS -= $request->count;
+                if ($orderItem->ORIT_KGS <= 0)
                     $orderItem->delete();
                 else
                     $orderItem->save();
                 $order->recalculateTotal();
-                $order->addTimeline("Item added to Return Order");
+                $order->addTimeline("Item (" . $product->PROD_NAME . ") added to Return Order");
             } elseif ($order->ORDR_STTS_ID != 1) { //if it is not still new
                 return redirect("orders/details/" . $orderItem->ORIT_ORDR_ID);
             } else {
-                $orderItem->ORIT_KMS = $request->count;
+                //check if it is verified
+                if ($orderItem->ORIT_VRFD = 0) {
+                    $product = Product::findOrFail($orderItem->inventory->INVT_PROD_ID);
+                    //if yes return items in inventory as it will be re added
+                    Inventory::insertEntry(array([
+                        "modelID"   =>  $product->id,
+                        "count"     =>  $orderItem->ORIT_KGS,
+                    ]), $orderItem->ORIT_ORDR_ID, true, "Order (" . $order->id . ") Item (" . $product->PROD_NAME . ") Quantity changed");
+                }
+                $orderItem->ORIT_KGS = $request->count;
+                $orderItem->ORIT_PRCE = $request->price;
                 $orderItem->ORIT_VRFD = 0;
                 $orderItem->save();
                 $order->recalculateTotal();
@@ -476,7 +518,7 @@ class OrdersController extends Controller
     {
 
         $request->validate([
-            "user"          =>  "required_if:guest,2|nullable|exists:users,id",
+            "client"          =>  "required_if:guest,2|nullable|exists:clients,id",
             "guestName"     =>  "required_if:guest,1",
             "guestMob"      =>  "required_if:guest,1",
             "area"          =>  "required",
@@ -485,8 +527,8 @@ class OrdersController extends Controller
         ]);
         $order = new Order();
         DB::transaction(function () use ($request, $order) {
-            if (isset($request->user))
-                $order->ORDR_USER_ID = $request->user;
+            if (isset($request->client))
+                $order->ORDR_CLNT_ID = $request->client;
             else {
                 $order->ORDR_GEST_NAME = $request->guestName;
                 $order->ORDR_GEST_MOBN = $request->guestMob;
@@ -500,16 +542,12 @@ class OrdersController extends Controller
             $order->ORDR_DASH_ID = Auth::user()->id; // new order
 
             $orderItemArray = $this->getOrderItemsObjectArray($request);
+
             $order->ORDR_TOTL = $this->getOrderTotal($request);
 
             $order->save();
             $order->addTimeline("Order Opened by dashboard user");
             $order->order_items()->saveMany($orderItemArray);
-            foreach ($orderItemArray as $item) {
-                $inventory = Inventory::findOrFail($item->ORIT_INVT_ID);
-                $inventory->INVT_CUNT -= $item->ORIT_KMS;
-                $inventory->save();
-            }
         });
 
         return redirect("orders/details/" . $order->id);
@@ -536,10 +574,10 @@ class OrdersController extends Controller
             $this->data['items']    = Order::getOrdersByDate(false, $month, $year, $state);
         }
         $this->data['cardTitle'] = true;
-        $this->data['cols'] = ['id', 'Client', 'Status', 'Area', 'Payment',  'Items', 'Ordered On', 'Closed On', 'Total'];
+        $this->data['cols'] = ['id', 'Client', 'Status', 'Area', 'Payment', 'Ordered On', 'Closed On',  'KGs', 'Total'];
         $this->data['atts'] = [
             ['attUrl' => ['url' => "orders/details", "shownAtt" => 'id', "urlAtt" => 'id']],
-            ['urlOrStatic' => ['url' => "users/profile", "shownAtt" => 'USER_NAME', "urlAtt" => 'ORDR_USER_ID', 'static' => 'ORDR_GEST_NAME']],
+            ['urlOrStatic' => ['url' => "clients/profile", "shownAtt" => 'CLNT_NAME', "urlAtt" => 'ORDR_CLNT_ID', 'static' => 'ORDR_GEST_NAME']],
             [
                 'stateQuery' => [
                     "classes" => [
@@ -558,10 +596,10 @@ class OrdersController extends Controller
             ],
             'AREA_NAME',
             'PYOP_NAME',
-            'itemsCount',
             'ORDR_OPEN_DATE',
             'ORDR_DLVR_DATE',
-            'ORDR_TOTL'
+            ['number' => ['att' => 'itemsCount']],
+            ['number' => ['att' => 'ORDR_TOTL']]
         ];
     }
 
@@ -571,7 +609,7 @@ class OrdersController extends Controller
         foreach ($request->item as $index => $item) {
             array_push(
                 $retArr,
-                ["ORIT_INVT_ID" => $item, "ORIT_KMS" => $request->count[$index]]
+                ["ORIT_INVT_ID" => $item, "ORIT_KGS" => $request->count[$index], "ORIT_PRCE" => $request->price[$index]]
             );
         }
         return $retArr;
@@ -582,7 +620,7 @@ class OrdersController extends Controller
         $retArr = array();
         foreach ($request->item as $index => $item) {
             array_push($retArr, new OrderItem(
-                ["ORIT_INVT_ID" => $item, "ORIT_KMS" => $request->count[$index]]
+                ["ORIT_INVT_ID" => $item, "ORIT_KGS" => $request->count[$index], "ORIT_PRCE" => $request->price[$index]]
             ));
         }
         return $retArr;
@@ -592,9 +630,8 @@ class OrdersController extends Controller
     {
         $total = 0;
         foreach ($request->item as $index => $item) {
-            $product = Inventory::with("product")->findOrFail($item)->product;
-            $price = $product->PROD_PRCE - $product->PROD_OFFR;
-            $total += $request->count[$index] * $price;
+            $price = $request->price[$index] * $request->count[$index];
+            $total += $price;
         }
         return $total;
     }

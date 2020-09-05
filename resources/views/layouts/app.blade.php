@@ -164,74 +164,72 @@
                             <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-boxes"></i><span class="hide-menu"> Inventory</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('inventory/current/stock')}}">Current Stock List</a></li>
-                                <li><a href="{{url('inventory/new/entry')}}">Add New Stock</a></li>
+                                <li><a href="{{url('inventory/entry/new')}}">Add New Stock</a></li>
                                 <li><a href="{{url('inventory/transactions')}}">Transactions</a></li>
                             </ul>
                         </li>
 
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Clients</span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('clients/show/latest')}}">Latest Clients</a></li>
-                                {{-- <li><a href="{{url('clients/show/top')}}">Top Customers</a>
-                        </li> --}}
-                        <li><a href="{{url('clients/show/all')}}">Show All</a></li>
-                        <li><a href="{{url('clients/add')}}">Add Client</a></li>
-                    </ul>
-                    </li>
 
-                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chart-bar"></i><span class="hide-menu"> Reports</span></a>
-                        <ul aria-expanded="false" class="collapse">
-                            <li><a href="{{url('suppliers/trans/prepare')}}">Inventory</a></li>
-                            <li><a href="{{url('suppliers/trans/quick')}}">Sales</a></li>
-                            <li><a href="{{url('suppliers/show')}}">Users</a></li>
-                        </ul>
-                    </li>
+                                <li><a href="{{url('clients/show/all')}}">Show All</a></li>
+                                <li><a href="{{url('clients/add')}}">Add Client</a></li>
+                            </ul>
+                        </li>
+
+                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chart-bar"></i><span class="hide-menu"> Reports</span></a>
+                            <ul aria-expanded="false" class="collapse">
+                                <li><a href="{{url('suppliers/trans/prepare')}}">Inventory</a></li>
+                                <li><a href="{{url('suppliers/trans/quick')}}">Sales</a></li>
+                                <li><a href="{{url('suppliers/show')}}">Users</a></li>
+                            </ul>
+                        </li>
 
 
-                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-list"></i><span class="hide-menu"> Catalogue</span></a>
-                        <ul aria-expanded="false" class="collapse">
+                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-list"></i><span class="hide-menu"> Catalogue</span></a>
+                            <ul aria-expanded="false" class="collapse">
 
-                            <li>
-                                <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Products</a>
-                                <ul aria-expanded="false" class="collapse">
-                                    <li><a href="{{url('products/show/all')}}">All Products</a></li>
-                                    <li><a href="{{url('products/filter/category')}}">By Category</a></li>
-                                    <li><a href="{{url('products/add')}}">Add a Product</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="{{url('categories/show')}}">Categories</a></li>
-                        </ul>
-                    </li>
-                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Suppliers</span></a>
-                        <ul aria-expanded="false" class="collapse">
-                            <li><a href="{{url('suppliers/show/all')}}">Show All</a></li>
-                            <li><a href="{{url('suppliers/add')}}">Add Supplier</a></li>
-                        </ul>
-                    </li>
+                                <li>
+                                    <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Products</a>
+                                    <ul aria-expanded="false" class="collapse">
+                                        <li><a href="{{url('products/show/all')}}">All Products</a></li>
+                                        <li><a href="{{url('products/filter/category')}}">By Category</a></li>
+                                        <li><a href="{{url('products/add')}}">Add a Product</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="{{url('categories/show')}}">Categories</a></li>
+                            </ul>
+                        </li>
+                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Suppliers</span></a>
+                            <ul aria-expanded="false" class="collapse">
+                                <li><a href="{{url('suppliers/show/all')}}">Show All</a></li>
+                                <li><a href="{{url('suppliers/add')}}">Add Supplier</a></li>
+                            </ul>
+                        </li>
 
 
 
-                    <li>
-                        <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-flask"></i><span class="hide-menu"> Raw Materials</span></a>
-                        <ul aria-expanded="false" class="collapse">
-                            <li><a href="{{url('rawmaterials/current/stock')}}"> Stock</a></li>
-                            <li><a href="{{url('rawmaterials/new/entry')}}"> New Entry</a></li>
-                            <li><a href="{{url('rawmaterials/show')}}">Show All</a></li>
-                        </ul>
-                    </li>
+                        <li>
+                            <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-flask"></i><span class="hide-menu"> Raw Materials</span></a>
+                            <ul aria-expanded="false" class="collapse">
+                                <li><a href="{{url('rawmaterials/stock')}}"> Stock</a></li>
+                                <li><a href="{{url('rawmaterials/entry/new')}}"> New Entry</a></li>
+                                <li><a href="{{url('rawmaterials/show')}}">Show All</a></li>
+                            </ul>
+                        </li>
 
-                    <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cogs"></i><span class="hide-menu"> Settings </span></a>
-                        <ul aria-expanded="false" class="collapse">
-                            <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Delivery</a>
-                                <ul aria-expanded="false" class="collapse">
-                                    <li><a href="{{url('areas/show')}}">Areas</a></li>
-                                    <li><a href="{{url('drivers/show')}}">Drivers</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
-                        </ul>
-                    </li>
-                    <li> <a href="{{url('dash/users/all')}}"><i class=" fas fa-users"></i><span class="hide-menu">Dashboard Admins</span></a></li>
+                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cogs"></i><span class="hide-menu"> Settings </span></a>
+                            <ul aria-expanded="false" class="collapse">
+                                <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Delivery</a>
+                                    <ul aria-expanded="false" class="collapse">
+                                        <li><a href="{{url('areas/show')}}">Areas</a></li>
+                                        <li><a href="{{url('drivers/show')}}">Drivers</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
+                            </ul>
+                        </li>
+                        <li> <a href="{{url('dash/users/all')}}"><i class=" fas fa-users"></i><span class="hide-menu">Dashboard Admins</span></a></li>
 
                     </ul>
                 </nav>

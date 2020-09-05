@@ -38,7 +38,7 @@
                 <!--Orders tab-->
                 <div class="tab-pane active" id="history" role="tabpanel">
                     <div class="card-body">
-                        <h4 class="card-title">User's Orders History</h4>
+                        <h4 class="card-title">Client's Orders History</h4>
                         <h6 class="card-subtitle">Total Money Paid: {{$clientMoney->paid}}, Discount offered: {{$clientMoney->discount}}</h6>
                         <div class="col-12">
                             <x-datatable id="myTable" :title="$title ?? 'Orders History'" :subtitle="$subTitle ?? ''" :cols="$ordersCols" :items="$orderList" :atts="$orderAtts" :cardTitle="false" />

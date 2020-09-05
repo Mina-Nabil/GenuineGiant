@@ -12,39 +12,32 @@
                 <div class="card-body">
                     <h4 class="card-title">{{ $formTitle }}</h4>
                     <h6 class="card-subtitle">Order Details</h6>
-                    {{$errors}}
+
                     @csrf
                     <div class="form-group">
-                        <label>User Or Guest?</label>
+                        <label>Client Or Guest?</label>
                         <div class="input-group mb-3">
                             <select name=guest id=guest class="form-control custom-select" style="width: 100%; height:36px;" onchange="toggleGuest()" required>
-                                <option value=1 
-                                @if(old('guest')==1)
-                                selected
-                                @endif
-                                >Guest</option>
-                                <option value=2
-                                @if(old('guest')==2)
-                                selected
-                                @endif>Registered User</option>
+                                <option value=1 @if(old('guest')==1) selected @endif>Guest</option>
+                                <option value=2 @if(old('guest')==2) selected @endif>Registered User</option>
                             </select>
                         </div>
                         <small class="text-danger">{{$errors->first('guest')}}</small>
                     </div>
 
                     <div id=isuser style="display: none">
-                        <input type="hidden" name=user id=userID>
+                        <input type="hidden" name=client id=userID>
                         <div class="form-group">
-                            <label>User</label>
+                            <label>Clients</label>
                             <div class="input-group mb-3">
                                 <select name=userSel id=userSel class="select2 form-control custom-select" style="width: 100%; height:36px;" onchange="loadUser()">
-                                    <option value="" disabled selected>Pick From Users</option>
-                                    @foreach($users as $user)
-                                    <option value="{{ $user->id }}%%{{ $user->USER_AREA_ID}}%%{{$user->USER_ADRS}}" @if(old('user')==$user->id)
+                                    <option value="" disabled selected>Pick From Clients</option>
+                                    @foreach($clients as $client)
+                                    <option value="{{ $client->id }}%%{{ $client->CLNT_AREA_ID}}%%{{$client->CLNT_ADRS}}" @if(old('user')==$client->id)
                                         selected
                                         @endif
                                         >
-                                        {{$user->USER_NAME}} - {{$user->USER_MOBN}}
+                                        {{$client->CLNT_NAME}} - {{$client->CLNT_MOBN}}
                                     </option>
                                     @endforeach
                                 </select>
@@ -113,7 +106,7 @@
                     <div class="form-group">
                         <label>Additional Notes</label>
                         <div class="input-group mb-3">
-                            <textarea class="form-control" name="note"  rows="3">{{old('note')}}</textarea>
+                            <textarea class="form-control" name="note" rows="3">{{old('note')}}</textarea>
                         </div>
                         <small class="text-danger">{{$errors->first('note')}}</small>
                     </div>
@@ -132,22 +125,27 @@
                         </div>
 
                         <div class="row col-lg-12">
-                            <div class="col-lg-9">
+                            <div class="col-lg-6">
                                 <div class="input-group mb-2">
-                                    <select name=item[] class="form-control select2  custom-select" id=inventory1 onchange="changeMax(inventory1)" required>
+                                    <select name=item[] class="form-control select2  custom-select" id=inventory1 onchange="changePrices(inventory1)" required>
                                         <option disabled hidden selected value="">Model</option>
                                         @foreach($inventory as $item)
                                         <option value="{{ $item->id }}">
-                                            {{$item->product->PROD_NAME}} - {{$item->color->COLR_NAME}} - {{$item->size->SIZE_NAME}} - Available:{{$item->INVT_CUNT}}</option>
+                                            {{$item->product->PROD_NAME}} - {{$item->product->PROD_ARBC_NAME}} : Available: {{number_format($item->INVT_KGS,2)}}KGs</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
-    
 
                             <div class="col-lg-3">
                                 <div class="input-group mb-3">
-                                    <input type="number" step=1 id=count1 class="form-control amount" placeholder="Items Count" min=0 name=count[] aria-describedby="basic-addon11" required>
+                                    <input list=as3ar1 id=price1 type="number" step="0.01" class="form-control amount" placeholder="Price"  name=price[] aria-describedby="basic-addon11" required>
+                                    <datalist id=as3ar1></datalist>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="input-group mb-3">
+                                    <input type="number" step=0.01 id=count1 class="form-control amount" placeholder="KGs" min=0 name=count[] aria-describedby="basic-addon11" required>
                                     <div class="input-group-append">
                                         <button class="btn btn-success" id="dynamicAddButton" type="button" onclick="addToab();"><i class="fa fa-plus"></i></button>
                                     </div>
@@ -170,9 +168,7 @@
 
 @section('js_content')
 <script>
-
-
-var room = 1;
+    var room = 1;
    function addToab() {
    
    room++;
@@ -181,20 +177,28 @@ var room = 1;
    divtest.setAttribute("class", "nopadding row col-lg-12 removeclass" + room);
    var rdiv = 'removeclass' + room;
    var concatString = "";
-   concatString +=   '<div class="col-lg-9">\
+   concatString +=   '<div class="col-lg-6">\
                                 <div class="input-group mb-2">\
-                                    <select name=item[] class="form-control select2  custom-select" id=inventory' + room + ' onchange="changeMax(inventory' + room + ')" required>\
+                                    <select name=item[] class="form-control select2  custom-select" id=inventory' + room + ' onchange="changePrices(inventory' + room + ')" required>\
                                         <option disabled hidden selected value="">Model</option>\
                                         @foreach($inventory as $item)\
                                         <option value="{{ $item->id }}">\
-                                            {{$item->product->PROD_NAME}} - {{$item->color->COLR_NAME}} - {{$item->size->SIZE_NAME}} - Available:{{$item->INVT_CUNT}}</option>\
+                                            {{$item->product->PROD_NAME}} - {{$item->product->PROD_ARBC_NAME}} : Available: {{number_format($item->INVT_KGS,2)}}KGs</option>\
                                         @endforeach\
                                     </select>\
                                 </div>\
                             </div>';
-   concatString +=                    " <div class='col-lg-3'>\
+
+    concatString += '<div class="col-lg-3">\
+                                <div class="input-group mb-3">\
+                                    <input  list=as3ar' + room + ' type="number" step="0.01" id=price' + room + ' class="form-control amount" placeholder="Price" min=0 name=price[] aria-describedby="basic-addon11" required>\
+                                    <datalist id=as3ar' + room + '></datalist>\
+                                </div>\
+                            </div>';
+    
+   concatString +=    " <div class='col-lg-3'>\
                                <div class='input-group mb-3'>\
-                                   <input type='number' step=1 class='form-control amount' placeholder='Items Count' min=0 id=count" + room + "\
+                                   <input type='number' step=1 class='form-control amount' placeholder='KGs' min=0 id=count" + room + "\
                                        name=count[] \
                                        aria-describedby='basic-addon11' required>\
                                    <div class='input-group-append'>\
@@ -215,13 +219,49 @@ var room = 1;
 
     }
    
-   function changeMax(callerID) {
-       itemIndex = callerID.id.substring(9, callerID.id.length)
-        count = document.getElementById('count' + itemIndex) 
-        optionString = callerID.options[callerID.selectedIndex].innerHTML
-        count.max = optionString.substring(optionString.indexOf(":", optionString.length-10)+1 ,optionString.length)
+   function changePrices(callerID) {
+    itemIndex = callerID.id.substring(9, callerID.id.length);
+    prodID = callerID.options[callerID.selectedIndex].value;
+
+
+    var http = new XMLHttpRequest();
+    var url = "{{url('api/get/product/prices')}}";
+    http.open('POST', url, true);
+    //Send the proper header information along with the request
+    //http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    var formdata = new FormData();
+    formdata.append('id',prodID);
+    formdata.append('_token','{{ csrf_token() }}');
+
+    http.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        try {        
+            prices = JSON.parse(this.responseText);
+            priceText = document.getElementById('price' + itemIndex);
+            priceText.value = '';
+            listtt = document.getElementById('as3ar' + itemIndex);
+            listtt.innerHTML = '';
+            listtt.innerHTML += '<option value="' + prices['retail'] + '">Retail Price: ' + prices['retail'] + '</option>';
+            listtt.innerHTML += '<option value="' + prices['whole'] + '">Whole Price: ' + prices['whole'] + '</option>';
+            listtt.innerHTML += '<option value="' + prices['inside'] + '">Inside Price: ' + prices['inside'] + '</option>';
+           
+        } catch(e){
+            console.log(e); 
+        }
+      } 
+    };
+    http.send(formdata, true);
    }
 
+   function IsJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
 
     function toggleGuest(){
     var selectaya = document.getElementById("guest");

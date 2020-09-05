@@ -42,7 +42,7 @@
                         @elseif(array_key_exists('del', $att))
                         <td><a href="{{ url( $att['del']['url'] . $item->{$att['del']['att']}) }}"><img src="{{ asset('images/del.png') }}" width=25 height=25></a></td>
                         @elseif(array_key_exists('foreign', $att))
-                        <td>{{ $item->{$att['foreign'][0]}->{$att['foreign'][1]}  }}</td>
+                        <td>{{ $item->{$att['foreign'][0]}->{$att['foreign'][1]} ?? '' }}</td>
                         @elseif(array_key_exists('sumForeign', $att))
                         <td>{{ $item->{$att['sumForeign']['rel']}->sum($att['sumForeign']['att'])  }}</td>
                         @elseif(array_key_exists('url', $att))
@@ -78,7 +78,7 @@
                             </a>
                         </td>
                         @elseif(array_key_exists('date', $att))
-                        <td>{{ $item->{$att['date']['att']}->format($att['date']['format'])  }}</a></td>
+                        <td>{{  $item->{$att['date']['att']}->format($att['date']['format'] ?? 'd-M-y h:i A')  }}</a></td>
                         @elseif(array_key_exists('number', $att))
                         <td>{{ number_format($item->{$att['number']['att']}, $att['nums'] ?? 2)  }}</a></td>
                         @elseif(array_key_exists('attUrl', $att))
@@ -86,14 +86,19 @@
                         @elseif(array_key_exists('urlOrStatic', $att))
                         @isset($item->{$att['urlOrStatic']['shownAtt']})
                         <td><a href="{{ url($att['urlOrStatic']['url'] . '/' . $item->{$att['urlOrStatic']['urlAtt']}) }}">{{ $item->{$att['urlOrStatic']['shownAtt']}  }}</a></td>
-                        @else 
+                        @else
                         <td>{{ $item->{$att['urlOrStatic']['static']}  }}</td>
                         @endisset
                         @elseif(array_key_exists('foreignUrl', $att))
                         <td><a href="{{ url($att['foreignUrl'][0] . '/' . $item->{$att['foreignUrl']['1']}) }}">{{ $item->{$att['foreignUrl'][2]}->{$att['foreignUrl'][3]}  }}</a></td>
                         @elseif(array_key_exists('assetImg', $att))
-                        <td>   
+                        <td>
                             <img src="{{ asset( 'storage/'. $item->{$att['assetImg']['filename']}) }}" height="36" style="width: auto" />
+                        </td>
+                        @elseif(array_key_exists('comment', $att))
+                        <td>
+                            <button type="button" style="padding:.1rem" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="{{$item->{$att['comment']['att']} }}" data-original-title="Comment:">  <i class="far fa-list-alt"></i>
+                            </button>
                         </td>
                         @endif
                         @else

@@ -25,7 +25,7 @@ class Order extends Model
 
     public function client()
     {
-        return $this->belongsTo("App\Models\User", "ORDR_CLNT_ID", "id");
+        return $this->belongsTo("App\Models\Client", "ORDR_CLNT_ID", "id");
     }
 
     public function area()
@@ -52,9 +52,7 @@ class Order extends Model
     {
         $total = 0;
         foreach ($this->order_items as $item) {
-            $product = Inventory::with("product")->findOrFail($item->ORIT_INVT_ID)->product;
-            $price = $product->PROD_PRCE - $product->PROD_OFFR;
-            $total += $item->ORIT_KMS * $price;
+            $total += $item->ORIT_KGS * $item->ORIT_PRCE;
         }
         $this->ORDR_TOTL = $total;
         $this->save();
@@ -124,15 +122,13 @@ class Order extends Model
             ->Leftjoin("drivers", "ORDR_DRVR_ID", "=", "drivers.id")
             ->Leftjoin("order_items", "ORIT_ORDR_ID", "=", "orders.id")
             ->join("payment_options", "ORDR_PYOP_ID", "=", "payment_options.id")
-            ->select("orders.*", 'drivers.DRVR_NAME', "orders.ORDR_GEST_NAME", "order_status.STTS_NAME", "areas.AREA_NAME", "AREA_RATE", "clients.CLNT_NAME", "clients.CLNT_MOBN", "dash_users.DASH_USNM", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KMS) as itemsCount")
+            ->select("orders.*", 'drivers.DRVR_NAME', "orders.ORDR_GEST_NAME", "order_status.STTS_NAME", "areas.AREA_NAME", "AREA_RATE", "clients.CLNT_NAME", "clients.CLNT_MOBN", "dash_users.DASH_USNM", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount")
             ->groupBy("orders.id", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME")
             ->where('orders.id', $id)->get()->first();
 
         $ret['items'] = DB::table('order_items')->join("inventory", "ORIT_INVT_ID", "=", "inventory.id")
-            ->join("colors", "INVT_COLR_ID", "=", "colors.id")
             ->join("products", "INVT_PROD_ID", "=", "products.id")
-            ->join("sizes", "INVT_SIZE_ID", "=", "sizes.id")
-            ->select("order_items.id", "PROD_NAME", "COLR_NAME", "ORIT_KMS", "SIZE_NAME", "ORIT_VRFD", "PROD_PRCE", "PROD_OFFR")
+            ->select("order_items.id", "PROD_NAME", "ORIT_KGS", "ORIT_PRCE", "ORIT_VRFD", "ORIT_PRCE")
             ->where("ORIT_ORDR_ID", "=", $id)
             ->get();
 
@@ -173,7 +169,7 @@ class Order extends Model
             ->Leftjoin("dash_users", "ORDR_DASH_ID", "=", "dash_users.id")
             ->Leftjoin("order_items", "ORIT_ORDR_ID", "=", "orders.id")
             ->join("payment_options", "ORDR_PYOP_ID", "=", "payment_options.id")
-            ->select("orders.*", "order_status.STTS_NAME", "dash_users.DASH_USNM", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KMS) as itemsCount")
+            ->select("orders.*", "order_status.STTS_NAME", "dash_users.DASH_USNM", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount")
             ->groupBy("orders.id", "orders.ORDR_STTS_ID", "orders.ORDR_CLNT_ID", "orders.ORDR_OPEN_DATE", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME");
     }
 

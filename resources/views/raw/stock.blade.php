@@ -16,10 +16,10 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Retail Price Sum</h5>
+                <h5 class="card-title">Average EGP/KG</h5>
                 <div class="d-flex m-t-30 m-b-20 no-block align-items-center">
-                    <span class="display-5 text-warning"><i class="ti-money"></i></span>
-                    <a href="javscript:void(0)" class="link display-5 ml-auto">{{number_format($totalPrice,2)}}</a>
+                    <span class="display-5 text-warning"><i class="icon-briefcase"></i></span>
+                    <a href="javscript:void(0)" class="link display-5 ml-auto">{{number_format($averagePrice,2)}}</a>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Total Cost</h5>
+                <h5 class="card-title">Balance</h5>
                 <div class="d-flex m-t-30 m-b-20 no-block align-items-center">
                     <span class="display-5 text-success"><i class="ti-money"></i></span>
                     <a href="javscript:void(0)" class="link display-5 ml-auto">{{number_format($totalCost,2)}}</a>
@@ -65,7 +65,7 @@
                         <div class="tab-pane active" id="stock" role="tabpanel">
                             <div class="row">
                                 <div class="col-12">
-                                    <x-datatable id="myTable" :title="$stockTitle" :subtitle="$stockSubtitle" :cols="$stockCols" :items="$items" :atts="$stockAtts" />
+                                    <x-datatable id="myTable" :title="$rawTitle" :subtitle="$rawSubtitle" :cols="$rawCols" :items="$raws" :atts="$rawAtts" />
                                 </div>
                             </div>
                         </div>

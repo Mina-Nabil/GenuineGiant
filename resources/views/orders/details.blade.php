@@ -6,7 +6,7 @@
 
 <div class="row">
     <!-- Column -->
-    <div class="col-lg-12 col-xlg-3 col-md-5">
+    <div class="col-lg-12 ">
         <div class="card">
             @switch($order->ORDR_STTS_ID)
             @case(1)
@@ -51,9 +51,9 @@
                         </div>
                         <p>
                             @if(!$order->ORDR_GEST_NAME)
-                            <a href="{{url('users/profile/' . $order->ORDR_USER_ID )}}">
+                            <a href="{{url('users/profile/' . $order->ORDR_CLNT_ID )}}">
                                 @endif
-                                {{($order->ORDR_GEST_NAME) ? $order->ORDR_GEST_NAME . " (Guest)": $order->USER_NAME . " (User)"}}
+                                {{($order->ORDR_GEST_NAME) ? $order->ORDR_GEST_NAME . " (Guest)": $order->CLNT_NAME . " (User)"}}
                                 @if(!$order->ORDR_GEST_NAME)
                             </a>
                             @endif
@@ -63,7 +63,7 @@
                         <div class="font-bold">
                             Client Phone
                         </div>
-                        <p>{{($order->ORDR_GEST_MOBN) ? $order->ORDR_GEST_MOBN : $order->USER_MOBN}}</p>
+                        <p>{{($order->ORDR_GEST_MOBN) ? $order->ORDR_GEST_MOBN : $order->CLNT_MOBN}}</p>
                     </div>
                     <div class="col-md-2">
                         <div class="font-bold">
@@ -95,7 +95,7 @@
     </div>
     <!-- Column -->
     <!-- Column -->
-    <div class="col-lg-12 col-xlg-9 col-md-7">
+    <div class="col-lg-12">
         <div class="card">
             <!-- Nav tabs -->
             <div class="card-header">
@@ -191,8 +191,8 @@
                         <button class="btn btn-info mr-2" onclick="confirmAndGoTo('{{url('orders/details/' . $order->ORDR_RTRN_ID)}}', 'Go to the Return Order')">
                             Check Return Order</button>
                         @endif
-                        <button class="btn btn-success mr-2" onclick="confirmAndGoTo('{{url($setOrderDeliveredUrl)}}', 'Set Order as Delivered')" 
-                        @if($remainingMoney !=0) disabled @endif>Set Order as Delivered</button>
+                        <button class="btn btn-success mr-2" onclick="confirmAndGoTo('{{url($setOrderDeliveredUrl)}}', 'Set Order as Delivered')" @if($remainingMoney !=0) disabled @endif>Set Order as
+                            Delivered</button>
                         <button class="btn btn-danger mr-2" onclick="confirmAndGoTo('{{url($setOrderCancelledUrl)}}', 'Cancel the Order')">Cancel Order</button>
                         @break
                         @case(4)
@@ -218,9 +218,7 @@
                                 <thead>
                                     <th>Ready?</th>
                                     <th>Model</th>
-                                    <th>Color</th>
-                                    <th>Size</th>
-                                    <th>Quantity</th>
+                                    <th>KGs</th>
                                     <th>Price</th>
                                     <th>Total</th>
                                     @if($order->ORDR_STTS_ID==1 || $isPartiallyReturned)
@@ -239,11 +237,9 @@
                                                     @endif
                                         </td>
                                         <td>{{$item->PROD_NAME}}</td>
-                                        <td>{{$item->COLR_NAME}}</td>
-                                        <td>{{$item->SIZE_NAME}}</td>
-                                        <td>{{$item->ORIT_CUNT}}</td>
-                                        <td>{{$item->PROD_PRCE - $item->PROD_OFFR}}</td>
-                                        <td>{{$item->ORIT_CUNT * ($item->PROD_PRCE - $item->PROD_OFFR)}}</td>
+                                        <td>{{number_format($item->ORIT_KGS, 2)}} Kg</td>
+                                        <td>{{number_format($item->ORIT_PRCE, 2)}} EGP</td>
+                                        <td>{{number_format($item->ORIT_KGS *  $item->ORIT_PRCE, 2)}} EGP</td>
                                         @if($order->ORDR_STTS_ID==1 || $isPartiallyReturned)
                                         <td>
                                             <div class="btn-group">
@@ -262,7 +258,7 @@
                                                     @else
                                                     <button class="dropdown-item" onclick="toggleReady({{$item->id}}, this)">Remove Ready Flag!</button>
                                                     @endif
-                                                    <button class="dropdown-item" data-toggle="modal" data-target="#changeQuantity{{$item->id}}">Change Quantity</button>
+                                                    <button class="dropdown-item" data-toggle="modal" data-target="#changeQuantity{{$item->id}}">Edit Item</button>
                                                     <button class="dropdown-item" onclick="deleteItem({{$item->id}})">Remove Item</button>
                                                 </div>
                                                 @endif
@@ -275,7 +271,7 @@
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h4 class="modal-title">Change Model Quantity</h4>
+                                                    <h4 class="modal-title">Edit Item</h4>
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                 </div>
                                                 <form action="{{ url('orders/change/quantity') }}" method=post>
@@ -284,7 +280,11 @@
                                                         <input type=hidden name=itemID value="{{$item->id}}">
                                                         <div class="form-group col-md-12 m-t-0">
                                                             <h5>Amount</h5>
-                                                            <input type="number" step=1 class="form-control form-control-line" name=count value="{{$item->ORIT_CUNT}}" required>
+                                                            <input type="number" step=0.01 class="form-control form-control-line" name=count value="{{$item->ORIT_KGS}}" required>
+                                                        </div>
+                                                        <div class="form-group col-md-12 m-t-0">
+                                                            <h5>Price</h5>
+                                                            <input type="number" step=0.01 class="form-control form-control-line" name=price value="{{$item->ORIT_PRCE}}" required>
                                                         </div>
 
                                                     </div>
@@ -316,23 +316,29 @@
                                 <div id="dynamicContainer" class="nopadding row col-lg-12">
                                 </div>
 
-                                <div class="row col-lg-12 nopadding">
-                                    <div class="col-lg-9">
+                                <div class="row col-lg-12">
+                                    <div class="col-lg-6">
                                         <div class="input-group mb-2">
-                                            <select name=item[] class="form-control select2 custom-select" id=inventory1 onchange="changeMax(inventory1)" style="width: 100%" required>
+                                            <select name=item[] class="form-control select2  custom-select" style="width:100%" id=inventory1 onchange="changePrices(inventory1)" required>
                                                 <option disabled hidden selected value="">Model</option>
                                                 @foreach($inventory as $item)
                                                 <option value="{{ $item->id }}">
-                                                    {{$item->product->PROD_NAME}} - {{$item->color->COLR_NAME}} - {{$item->size->SIZE_NAME}} - Available:{{$item->INVT_CUNT}}</option>
+                                                    {{$item->product->PROD_NAME}} - {{$item->product->PROD_ARBC_NAME}} : Available: {{number_format($item->INVT_KGS,2)}}KGs</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
 
-
                                     <div class="col-lg-3">
                                         <div class="input-group mb-3">
-                                            <input type="number" step=1 id=count1 class="form-control amount" placeholder="Items Count" min=0 name=count[] aria-describedby="basic-addon11" required>
+                                            <input list=as3ar1 id=price1 type="number" step="0.01" class="form-control amount" placeholder="Price" name=price[] aria-describedby="basic-addon11"
+                                                required>
+                                            <datalist id=as3ar1></datalist>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="input-group mb-3">
+                                            <input type="number" step=0.01 id=count1 class="form-control amount" placeholder="KGs" min=0 name=count[] aria-describedby="basic-addon11" required>
                                             <div class="input-group-append">
                                                 <button class="btn btn-success" id="dynamicAddButton" type="button" onclick="addToab();"><i class="fa fa-plus"></i></button>
                                             </div>
@@ -623,7 +629,7 @@
 @section('js_content')
 <script>
     var room = 1;
-   function addToab() {
+    function addToab() {
    
    room++;
    var objTo = document.getElementById('dynamicContainer')
@@ -631,20 +637,28 @@
    divtest.setAttribute("class", "nopadding row col-lg-12 removeclass" + room);
    var rdiv = 'removeclass' + room;
    var concatString = "";
-   concatString +=   '<div class="col-lg-9">\
+   concatString +=   '<div class="col-lg-6">\
                                 <div class="input-group mb-2">\
-                                    <select name=item[] class="form-control select2  custom-select" id=inventory' + room + ' onchange="changeMax(inventory' + room + ')" required>\
+                                    <select name=item[] class="form-control select2  custom-select" id=inventory' + room + ' onchange="changePrices(inventory' + room + ')" required>\
                                         <option disabled hidden selected value="">Model</option>\
                                         @foreach($inventory as $item)\
                                         <option value="{{ $item->id }}">\
-                                            {{$item->product->PROD_NAME}} - {{$item->color->COLR_NAME}} - {{$item->size->SIZE_NAME}} - Available:{{$item->INVT_CUNT}}</option>\
+                                            {{$item->product->PROD_NAME}} - {{$item->product->PROD_ARBC_NAME}} : Available: {{number_format($item->INVT_KGS,2)}}KGs</option>\
                                         @endforeach\
                                     </select>\
                                 </div>\
                             </div>';
-   concatString +=                    " <div class='col-lg-3'>\
+
+    concatString += '<div class="col-lg-3">\
+                                <div class="input-group mb-3">\
+                                    <input  list=as3ar' + room + ' type="number" step="0.01" id=price' + room + ' class="form-control amount" placeholder="Price" min=0 name=price[] aria-describedby="basic-addon11" required>\
+                                    <datalist id=as3ar' + room + '></datalist>\
+                                </div>\
+                            </div>';
+    
+   concatString +=    " <div class='col-lg-3'>\
                                <div class='input-group mb-3'>\
-                                   <input type='number' step=1 class='form-control amount' placeholder='Items Count' min=0 id=count" + room + "\
+                                   <input type='number' step=1 class='form-control amount' placeholder='KGs' min=0 id=count" + room + "\
                                        name=count[] \
                                        aria-describedby='basic-addon11' required>\
                                    <div class='input-group-append'>\
@@ -665,11 +679,48 @@
 
     }
    
-   function changeMax(callerID) {
-       itemIndex = callerID.id.substring(9, callerID.id.length)
-        count = document.getElementById('count' + itemIndex) 
-        optionString = callerID.options[callerID.selectedIndex].innerHTML
-        count.max = optionString.substring(optionString.indexOf(":", optionString.length-10)+1 ,optionString.length)
+   function changePrices(callerID) {
+    itemIndex = callerID.id.substring(9, callerID.id.length);
+    prodID = callerID.options[callerID.selectedIndex].value;
+
+
+    var http = new XMLHttpRequest();
+    var url = "{{url('api/get/product/prices')}}";
+    http.open('POST', url, true);
+    //Send the proper header information along with the request
+    //http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    var formdata = new FormData();
+    formdata.append('id',prodID);
+    formdata.append('_token','{{ csrf_token() }}');
+
+    http.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        try {        
+            prices = JSON.parse(this.responseText);
+            priceText = document.getElementById('price' + itemIndex);
+            priceText.value = '';
+            listtt = document.getElementById('as3ar' + itemIndex);
+            listtt.innerHTML = '';
+            listtt.innerHTML += '<option value="' + prices['retail'] + '">Retail Price: ' + prices['retail'] + '</option>';
+            listtt.innerHTML += '<option value="' + prices['whole'] + '">Whole Price: ' + prices['whole'] + '</option>';
+            listtt.innerHTML += '<option value="' + prices['inside'] + '">Inside Price: ' + prices['inside'] + '</option>';
+           
+        } catch(e){
+            console.log(e); 
+        }
+      } 
+    };
+    http.send(formdata, true);
    }
+
+   function IsJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
 </script>
 @endsection

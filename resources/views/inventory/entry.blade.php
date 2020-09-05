@@ -15,10 +15,10 @@
                         </div>
 
                         <div class="row col-lg-12">
-                            <div class="col-lg-3">
+                            <div class="col-lg-8">
                                 <div class="input-group mb-2">
                                     <select name=model[] class="form-control select2  custom-select" required>
-                                        <option disabled hidden selected value="">Models</option>
+                                        <option disabled hidden selected value="">Products</option>
                                         @foreach($products as $model)
                                         <option value="{{ $model->id }}">
                                             {{$model->PROD_NAME}} - {{$model->PROD_ARBC_NAME}} </option>
@@ -26,32 +26,11 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
-                                <div class="input-group mb-2">
-                                    <select name=color[] class="form-control select2  custom-select" required>
-                                        <option disabled hidden selected value="">Colors</option>
-                                        @foreach($colors as $color)
-                                        <option value="{{ $color->id }}">
-                                            {{$color->COLR_NAME}} - {{$color->COLR_ARBC_NAME}} </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="input-group mb-2">
-                                    <select name=size[] class="form-control select2  custom-select" required>
-                                        <option disabled hidden selected value="">Sizes</option>
-                                        @foreach($sizes as $size)
-                                        <option value="{{ $size->id }}">
-                                            {{$size->SIZE_NAME}} - {{$size->SIZE_CODE}} </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+    
 
-                            <div class="col-lg-3">
+                            <div class="col-lg-4">
                                 <div class="input-group mb-3">
-                                    <input type="number" step=1 class="form-control amount" placeholder="Items Count" name=count[] aria-describedby="basic-addon11" required>
+                                    <input type="number" step=1 class="form-control amount" placeholder="KGs" name=count[] aria-describedby="basic-addon11" required>
                                     <div class="input-group-append">
                                         <button class="btn btn-success" id="dynamicAddButton" type="button" onclick="addToab();"><i class="fa fa-plus"></i></button>
                                     </div>
@@ -78,11 +57,11 @@
    divtest.setAttribute("class", "nopadding row col-lg-12 removeclass" + room);
    var rdiv = 'removeclass' + room;
    var concatString = "";
-   concatString +=   "  <div class='col-lg-3'>\
+   concatString +=   "  <div class='col-lg-8'>\
                                <div class='input-group mb-2'>\
                                    <select  name=model[] class='select2 form-control  custom-select'\
                                        required>\
-                                       <option disabled hidden selected value=''>Models</option>\
+                                       <option disabled hidden selected value=''>Products</option>\
                                        @foreach($products as $model)\
                                        <option value='{{ $model->id }}'>\
                                            {{$model->PROD_NAME}} - {{$model->PROD_ARBC_NAME}} </option>\
@@ -90,34 +69,11 @@
                                    </select>\
                                </div>\
                            </div>";
-   concatString +=                    "<div class='col-lg-3'>\
-                               <div class='input-group mb-2'>\
-                                   <select  name=color[] class='select2 form-control  custom-select'\
-                                       required>\
-                                       <option disabled hidden selected value=''>Colors</option>\
-                                       @foreach($colors as $color)\
-                                       <option value='{{ $color->id }}'>\
-                                           {{$color->COLR_NAME}} - {{$color->COLR_ARBC_NAME}} </option>\
-                                       @endforeach\
-                                   </select>\
-                               </div>\
-                           </div>\
-                           <div class='col-lg-3'>\
-                               <div class='input-group mb-2'>\
-                                   <select  name=size[] class='select2 form-control  custom-select'\
-                                       required>\
-                                       <option disabled hidden selected value=''>Sizes</option>\
-                                       @foreach($sizes as $size)\
-                                       <option value='{{ $size->id }}'>\
-                                           {{$size->SIZE_NAME}} - {{$size->SIZE_CODE}} </option>\
-                                       @endforeach\
-                                   </select>\
-                               </div>\
-                           </div>";
+
    
-   concatString +=                    " <div class='col-lg-3'>\
+   concatString +=                    " <div class='col-lg-4'>\
                                <div class='input-group mb-3'>\
-                                   <input type='number' step=1 class='form-control amount' placeholder='Items Count'\
+                                   <input type='number' step=1 class='form-control amount' placeholder='KGs'\
                                        name=count[] \
                                        aria-describedby='basic-addon11' required>\
                                    <div class='input-group-append'>\

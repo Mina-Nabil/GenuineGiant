@@ -41,5 +41,13 @@ class Product extends Model
         ->get();
     }
 
+    public function calculateCost(){
+        $cost = 0;
+        foreach($this->ingredients as $ingredient){
+            $rawPrice = (RawMaterial::findOrFail($ingredient->IGDT_RWMT_ID))->RWMT_COST;
+            $cost += $rawPrice * $ingredient->IGDT_GRAM / 1000 ;
+        }
+    }
+
 
 }

@@ -31,12 +31,11 @@ class ClientsController extends Controller
             $this->data['items'] = Client::all()->sortByDesc('id');
 
         $this->data['subTitle'] = "Manage Clients";
-        $this->data['cols'] = ['id', 'Full Name', 'Email', 'Mob#', 'Balance', 'Area', 'Since', 'Edit'];
+        $this->data['cols'] = ['id', 'Full Name', 'Mob#', 'Balance', 'Area', 'Since', 'Edit'];
         $this->data['atts'] = [
             'id',
             ['attUrl' => ["url" => 'clients/profile', "urlAtt" => 'id', "shownAtt" =>  "CLNT_NAME"]],
-            ['verified' => ['att' => 'CLNT_MAIL', 'isVerified' => 'CLNT_MAIL_VRFD']],
-            ['verified' => ['att' => 'CLNT_MOBN', 'isVerified' => 'CLNT_MOBN_VRFD']],
+            'CLNT_MOB',
             ['number' => ['att' => 'CLNT_BLNC']],
             ['foreign' => ['area', 'AREA_NAME']],
             // ['sumForeign' => ['rel' => 'orders', 'att' => 'ORDR_TOTL']],

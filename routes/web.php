@@ -49,7 +49,7 @@ Route::post("orders/change/quantity", "OrdersController@changeQuantity");
 
 
 //Inventory
-Route::get("inventory/new/entry", "InventoryController@entry");
+Route::get("inventory/entry/new", "InventoryController@entry");
 Route::post("inventory/insert/entry", "InventoryController@insert");
 Route::get("inventory/current/stock", "InventoryController@stock");
 Route::get("inventory/transactions", "InventoryController@transactions");
@@ -101,6 +101,9 @@ Route::post('areas/insert', 'AreasController@insert');
 Route::post('areas/update', 'AreasController@update');
 
 //Tags
+Route::get('rawmaterials/entry/new', 'RawMaterialsController@entry');
+Route::get('rawmaterials/stock', 'RawMaterialsController@stock');
+Route::post('rawmaterials/entry/insert', 'RawMaterialsController@insertEntry');
 Route::get('rawmaterials/show', 'RawMaterialsController@home');
 Route::get('rawmaterials/edit/{id}', 'RawMaterialsController@edit');
 Route::post('rawmaterials/insert', 'RawMaterialsController@insert');
@@ -123,6 +126,18 @@ Route::get("dash/users/all", 'DashUsersController@index');
 Route::post("dash/users/insert", 'DashUsersController@insert');
 Route::get("dash/users/edit/{id}", 'DashUsersController@edit');
 Route::post("dash/users/update", 'DashUsersController@update');
+
+//Suppliers users
+Route::get("suppliers/show/all", 'SuppliersController@home');
+Route::get("suppliers/add", 'SuppliersController@add');
+Route::post("suppliers/insert", 'SuppliersController@insert');
+Route::get("suppliers/edit/{id}", 'SuppliersController@edit');
+Route::get("suppliers/profile/{id}", 'SuppliersController@profile');
+Route::post("suppliers/update", 'SuppliersController@update');
+Route::post("suppliers/pay", 'SuppliersController@pay');
+
+
+Route::post('api/get/product/prices', 'ApiController@getProductPrices');
 
 
 Route::get('logout', 'HomeController@logout')->name('logout');
