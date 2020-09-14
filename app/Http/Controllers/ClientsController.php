@@ -8,6 +8,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\ClientPayments;
+use App\Rules\triplename;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -99,21 +100,22 @@ class ClientsController extends Controller
             ->orderByDesc('id')->get();
         $this->data['payTitle'] = "Payments";
         $this->data['paySubtitle'] = "Check client transactions for " . $this->data['client']->CLNT_NAME;
-        $this->data['payCols'] = ['Date', 'Paid By', 'Amount', 'Balance', 'Comment'];
+        $this->data['payCols'] = ['Date', 'Paid By', 'Amount', 'Balance', 'Order#', 'Comment'];
         $this->data['payAtts'] = [
             ['date' => ['att' => 'created_at']],
             ['foreign' => ['dash_user', 'DASH_USNM']],
             ["number" => ['att' => 'CLPY_PAID', 'nums' => 2]],
             ["number" => ['att' => 'CLPY_BLNC', 'nums' => 2]],
+            ['attUrl' => ['url' => 'orders/details', 'shownAtt' => 'CLPY_ORDR_ID', 'urlAtt' => 'CLPY_ORDR_ID']],
             ["comment" => ['att' => 'CLPY_CMNT']],
         ];
 
         //Totals Sales
         $this->data['totalGraphs'] =  [];
         $this->data['totalTotals'] =  [];
-        $this->data['totalCardTitle'] =  "Total Revenue";
-        $this->data['totalTitle'] =  "Overall Sales Total";
-        $this->data['totalSubtitle'] =  "Check total money recieved and number of items sold";
+        $this->data['totalCardTitle'] =  "Total KGs";
+        $this->data['totalTitle'] =  "Monthly Report";
+        $this->data['totalSubtitle'] =  "Check total KGs bought each month";
 
         //Items Bought
         $this->data['boughtList'] = $this->data['client']->itemsBought();
@@ -125,8 +127,8 @@ class ClientsController extends Controller
         ];
 
         //payment form
-        $this->data['formTitle'] = "Add Client Payment";
-        $this->data['formURL'] = url('clients/pay');
+        $this->data['payFormTitle'] = "Add Client Payment";
+        $this->data['payFormURL'] = url('clients/pay');
     }
 
     public function home()
@@ -181,8 +183,11 @@ class ClientsController extends Controller
     public function insert(Request $request)
     {
         $request->validate([
-            "name"              => "required",
+            "name"              => ["required", new Triplename],
             "mob"               => "required|numeric",
+            "avg"               => "nullable|numeric",
+            "long"               => "nullable|numeric",
+            "latt"               => "nullable|numeric",
             "area"          => "required|exists:areas,id"
         ]);
 
@@ -192,6 +197,9 @@ class ClientsController extends Controller
         $client->CLNT_MOBN = $request->mob;
         $client->CLNT_BLNC = $request->balance ?? 0;
         $client->CLNT_AREA_ID = $request->area;
+        $client->CLNT_LATT = $request->latt;
+        $client->CLNT_LONG = $request->long;
+        $client->CLNT_AVGK = $request->avg;
 
         $client->save();
 
@@ -205,9 +213,12 @@ class ClientsController extends Controller
         ]);
         $client = Client::findOrFail($request->id);
         $request->validate([
-            "name"          => "required",
+            "name"          => ["required", "string", new Triplename],
             "mob"           => "required|numeric",
-            "area"          => "required|exists:areas,id"
+            "area"          => "required|exists:areas,id",
+            "avg"               => "nullable|numeric",
+            "long"               => "nullable|numeric",
+            "latt"               => "nullable|numeric",
         ]);
 
         $client->CLNT_NAME = $request->name;
@@ -215,6 +226,9 @@ class ClientsController extends Controller
         $client->CLNT_MOBN = $request->mob;
         $client->CLNT_BLNC = $request->balance ?? 0;
         $client->CLNT_AREA_ID = $request->area;
+        $client->CLNT_LATT = $request->latt;
+        $client->CLNT_LONG = $request->long;
+        $client->CLNT_AVGK = $request->avg;
 
         $client->save();
 

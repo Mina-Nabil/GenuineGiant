@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 //Site
-Route::get("site/home", 'SiteController@home');
+Route::get("accounts/cash", 'CashController@home');
+Route::post("cash/insert", 'CashController@insert');
+Route::get("accounts/invoices", 'RawMaterialsController@invoices');
+Route::post("invoice/insert", 'RawMaterialsController@insertInvoice');
 
 
 //Orders

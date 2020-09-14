@@ -43,12 +43,13 @@
         <div class="card">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs profile-tab" role="tablist">
-                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#perf" role="tab">Performance</a> </li>
-                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#history" role="tab">Order History</a> </li>
+                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#perf" role="tab">Perf.</a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#map" role="tab">Map</a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#history" role="tab">History</a> </li>
                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#bought" role="tab">Items Bought</a> </li>
                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#paid" role="tab">Account</a> </li>
                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#pay" role="tab">Add Payment</a> </li>
-                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#settings" role="tab">Settings</a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#settings" role="tab">Info</a> </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content">
@@ -62,8 +63,8 @@
                         </div>
                     </div>
                 </div>
-                 <!--Orders tab-->
-                 <div class="tab-pane" id="history" role="tabpanel">
+                <!--Orders tab-->
+                <div class="tab-pane" id="history" role="tabpanel">
                     <div class="card-body">
                         <h4 class="card-title">Client's Orders History</h4>
                         <h6 class="card-subtitle">Total Money Paid: {{$clientMoney->paid}}, Discount offered: {{$clientMoney->discount}}</h6>
@@ -96,8 +97,8 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">{{ $formTitle }}</h4>
-                                    <form class="form pt-3" method="post" action="{{ url($formURL) }}" enctype="multipart/form-data">
+                                    <h4 class="card-title">{{ $payFormTitle }}</h4>
+                                    <form class="form pt-3" method="post" action="{{ url($payFormURL) }}" enctype="multipart/form-data">
                                         @csrf
                                         <input type=hidden name=id value="{{(isset($client)) ? $client->id : ''}}">
 
@@ -126,7 +127,25 @@
                         </div>
                     </div>
                 </div>
-
+                <div class="tab-pane" id="map" role="tabpanel">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                @if(isset($client->CLNT_LONG) && isset($client->CLNT_LATT))
+                                <iframe width="100%" height="500" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+                                    src="https://maps.google.com/maps?q={{$client->CLNT_LATT}},{{$client->CLNT_LONG}}&hl=en&z=14&amp;output=embed">
+                                </iframe>
+                                <br />
+                                <small>
+                                    <a href="https://maps.google.com/maps?q={{$client->CLNT_LATT}},{{$client->CLNT_LONG}}&hl=en;z=14&amp;output=embed" style="color:#0000FF;text-align:left" target="_blank">
+                                        See map bigger
+                                    </a>
+                                </small>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="tab-pane" id="settings" role="tabpanel">
                     <div class="card-body">
@@ -160,7 +179,15 @@
                                 <small class="text-danger">{{$errors->first('balance')}}</small>
                             </div>
 
+                            <div class="form-group">
+                                <label>Average Usage</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" step="0.01" class="form-control" placeholder="Client Average use in Kilograms" name=avg
+                                        value="{{ (isset($client)) ? $client->CLNT_AVGK : old('avg') }}">
+                                </div>
 
+                                <small class="text-danger">{{$errors->first('avg')}}</small>
+                            </div>
 
                             <div class="form-group">
                                 <label>Area*</label>
@@ -189,11 +216,31 @@
                                 <small class="text-danger">{{$errors->first('balance')}}</small>
                             </div>
 
+                            <div class="form-group">
+                                <label>Lattitude</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Pin Lattitude" name=latt value="{{ (isset($client)) ? $client->CLNT_LATT : old('latt') }}">
+                                </div>
+
+                                <small class="text-danger">{{$errors->first('latt')}}</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Longitude</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Pin Longitude" name=long value="{{ (isset($client)) ? $client->CLNT_LONG : old('long') }}">
+                                </div>
+
+                                <small class="text-danger">{{$errors->first('long')}}</small>
+                            </div>
+
 
                             <button type="submit" class="btn btn-success mr-2">Submit</button>
                         </form>
                     </div>
                 </div>
+
+
             </div>
         </div>
     </div>

@@ -19,23 +19,35 @@
                         </div>
                         <small class="text-danger">{{$errors->first('name')}}</small>
                     </div>
-    
-                
+
+
                     <div class="form-group">
                         <label>Mobile Number*</label>
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" placeholder="Mobile Number" name=mob value="{{ (isset($client)) ? $client->CLNT_MOBN : old('mob') }}" required>
                         </div>
-                
+
                         <small class="text-danger">{{$errors->first('mob')}}</small>
                     </div>
+
                     <div class="form-group">
                         <label>Balance</label>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Client Balance" name=balance value="{{ (isset($client)) ? $client->CLNT_BLNC : old('balance') }}" required>
+                            <input type="number" step="0.01" class="form-control" placeholder="Client Balance, amount of money we have to collect from him" name=balance
+                                value="{{ (isset($client)) ? $client->CLNT_BLNC : old('balance') }}" required>
                         </div>
-                
+
                         <small class="text-danger">{{$errors->first('balance')}}</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Average Usage</label>
+                        <div class="input-group mb-3">
+                            <input type="number" step="0.01" class="form-control" placeholder="Client Average use in Kilograms" name=avg
+                                value="{{ (isset($client)) ? $client->CLNT_AVGK : old('avg') }}">
+                        </div>
+
+                        <small class="text-danger">{{$errors->first('avg')}}</small>
                     </div>
 
 
@@ -61,12 +73,30 @@
                     <div class="form-group">
                         <label>Address</label>
                         <div class="input-group mb-3">
-                           <textarea class="form-control" rows="3" name="address">{{ (isset($client)) ? $client->CLNT_ADRS : old('address') }}</textarea>
+                            <textarea class="form-control" rows="3" name="address">{{ (isset($client)) ? $client->CLNT_ADRS : old('address') }}</textarea>
                         </div>
-                
+
                         <small class="text-danger">{{$errors->first('balance')}}</small>
                     </div>
-            
+
+                    <div class="form-group">
+                        <label>Lattitude</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Pin Lattitude" name=latt value="{{ (isset($client)) ? $client->CLNT_LATT : old('latt') }}">
+                        </div>
+
+                        <small class="text-danger">{{$errors->first('latt')}}</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Pin Longitude" name=long value="{{ (isset($client)) ? $client->CLNT_LONG : old('long') }}">
+                        </div>
+
+                        <small class="text-danger">{{$errors->first('long')}}</small>
+                    </div>
+
 
                     <button type="submit" class="btn btn-success mr-2">Submit</button>
                     @if($isCancel)

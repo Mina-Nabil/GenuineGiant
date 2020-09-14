@@ -28,18 +28,18 @@ class Inventory extends Model
         return self::insertEntry($entryArr, $order->id, true, "Order Return");
     }
 
-    static public function insertEntry($entryArr, $orderID = null, $orderIn = false, $comment=null)
+    static public function insertEntry($entryArr, $orderID = null, $orderIn = false, $comment=null, $reflectOnRaw=false)
     {
         $transactionCode = date_format(now(), "ymdHis");
         $date = date_format(now(), "Y-m-d H:i:s");
-        return DB::transaction(function () use ($entryArr, $transactionCode, $orderID, $date, $orderIn, $comment) {
+        return DB::transaction(function () use ($entryArr, $transactionCode, $orderID, $date, $orderIn, $comment, $reflectOnRaw) {
             foreach ($entryArr as $row) {
-                self::insert($row['modelID'], (($orderID == null) || $orderIn) ? $row['count'] : -1 * $row['count'], $transactionCode, $orderID, $date, $orderIn, $comment);
+                self::insert($row['modelID'], (($orderID == null) || $orderIn) ? $row['count'] : -1 * $row['count'], $transactionCode, $orderID, $date, $orderIn, $comment, $reflectOnRaw);
             }
         });
     }
 
-    static public function insert($modelID, $count, $transactionCode, $orderID = null, $date = null, $orderIn = false, $comment=null)
+    static public function insert($modelID, $count, $transactionCode, $orderID = null, $date = null, $orderIn = false, $comment=null, $reflectOnRaw=false)
     {
 
         return DB::transaction(function () use ($modelID, $count, $transactionCode, $orderID, $date, $orderIn, $comment) {

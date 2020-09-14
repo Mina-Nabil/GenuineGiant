@@ -11,18 +11,6 @@
                     @csrf
 
                     <div class="form-group">
-                        <label>Transaction Title</label>
-                        <div class="input-group mb-3">
-                            <input type="text" list=desc class="form-control" name=desc placeholder="Title" value="{{old('desc')}}" required>
-                            <datalist id=desc>
-                                <option value="Whole Buy">
-                                <option value="Retail Buy">
-                            </datalist>
-                        </div>
-                        <small class="text-danger">{{$errors->first('desc')}}</small>
-                    </div>
-
-                    <div class="form-group">
                         <label>Raw Material</label>
                         <div class="input-group mb-2">
                             <select name=raw class="form-control select2  custom-select" style="width:100% " required>

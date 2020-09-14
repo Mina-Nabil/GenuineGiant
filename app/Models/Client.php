@@ -55,6 +55,10 @@ class Client extends Model
             $payment->CLPY_DASH_ID = Auth::user()->id;
 
             $this->payments()->save($payment);
+            $cashTitle = "Recieved from " . $this->CLNT_NAME;
+            if(isset($orderID) && is_numeric($orderID))
+                $cashTitle .= " for order(" . $orderID . ")";
+            Cash::entry($cashTitle, $amount, 0, $comment);
             $this->save();
         });
     }

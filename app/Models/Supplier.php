@@ -15,6 +15,22 @@ class Supplier extends Model
         return $this->hasMany('App\Models\SupplierPayment', 'SPPY_SUPP_ID');
     }
 
+    public function addInvoice($amount, $comment=null)
+    {
+        DB::transaction(function () use ($amount, $comment) {
+            $this->SUPP_BLNC += $amount;
+            $payment =  new SupplierPayment();
+            $payment->SPPY_PAID = 0;
+            $payment->SPPY_RCVD = $amount;
+            $payment->SPPY_CMNT = $comment;
+            $payment->SPPY_BLNC = $this->SUPP_BLNC;
+            $payment->SPPY_DASH_ID = Auth::user()->id;
+
+            $this->payments()->save($payment);
+            $this->save();
+        });
+    }
+
     public function pay($amount, $comment=null)
     {
         DB::transaction(function () use ($amount, $comment) {
@@ -26,6 +42,7 @@ class Supplier extends Model
             $payment->SPPY_DASH_ID = Auth::user()->id;
 
             $this->payments()->save($payment);
+            Cash::entry("Paid to " . $this->SUPP_NAME, 0, $amount, $comment);
             $this->save();
         });
     }

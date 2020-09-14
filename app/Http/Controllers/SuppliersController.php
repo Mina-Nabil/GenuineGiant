@@ -61,7 +61,7 @@ class SuppliersController extends Controller
         $this->data['raws'] = $this->data['supplier']->getSuppliedRawMaterials();
         $this->data['rawTitle'] = "Supplied Raw Materials";
         $this->data['rawSubtitle'] = "Check all Raw Materials supplied by " . $this->data['supplier']->SUPP_NAME;
-        $this->data['rawCols'] = ['Raw Material', 'Total KGs', 'Current Cost per KG'];
+        $this->data['rawCols'] = ['Raw Material', 'Total KGs', 'Supplier Cost per KG'];
         $this->data['rawAtts'] = [
             'RWMT_NAME',
             ["number" => ['att' => 'kgSupplied', 'nums' => 2]],
@@ -73,7 +73,7 @@ class SuppliersController extends Controller
             ->orderByDesc('raw_inventory.id')->get();
         $this->data['transTitle'] = "Transactions";
         $this->data['transSubtitle'] = "Check Latest entry records for " . $this->data['supplier']->SUPP_NAME;
-        $this->data['transCols'] = ['Date', 'User', 'Supplier', 'Raw', 'In', 'Out', 'Price', 'Balance', 'Comment'];
+        $this->data['transCols'] = ['Date', 'User', 'Supplier', 'Raw', 'In', 'Out', 'Price', 'KG Balance', 'Comment'];
         $this->data['transAtts'] = [
             ['date' => ['att' => 'created_at']],
             ['foreign' => ['dash_user', 'DASH_USNM']],
@@ -91,10 +91,11 @@ class SuppliersController extends Controller
             ->orderByDesc('id')->get();
         $this->data['payTitle'] = "Payments";
         $this->data['paySubtitle'] = "Check Latest payments for " . $this->data['supplier']->SUPP_NAME;
-        $this->data['payCols'] = ['Date', 'Paid By', 'Amount', 'Balance', 'Comment'];
+        $this->data['payCols'] = ['Date', 'Paid By', 'In', 'Out', 'Balance', 'Comment'];
         $this->data['payAtts'] = [
             ['date' => ['att' => 'created_at']],
             ['foreign' => ['dash_user', 'DASH_USNM']],
+            ["number" => ['att' => 'SPPY_RCVD', 'nums' => 2]],
             ["number" => ['att' => 'SPPY_PAID', 'nums' => 2]],
             ["number" => ['att' => 'SPPY_BLNC', 'nums' => 2]],
             ["comment" => ['att' => 'SPPY_CMNT']],

@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cash;
 use App\Models\RawInventory;
+use App\Models\RawInvoice;
 use App\Models\RawMaterial;
 use App\Models\Supplier;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class RawMaterialsController extends Controller
@@ -29,9 +34,48 @@ class RawMaterialsController extends Controller
         $this->data['homeURL'] = $this->homeURL;
     }
 
+    private function initInvoicesArr()
+    {
+        $this->data['latestInvoices'] = RawInvoice::latest()->limit(300)->get();
+        $this->data['latestTitle'] = "Latest Invoices";
+        $this->data['latestSubTitle'] = "Check last 300 Raw Materials Invoices";
+
+
+        $this->data['todayInvoices'] = RawInvoice::with('supplier')->whereDate('created_at', Carbon::today())->get();
+        $this->data['todayTitle'] = "Today's RawMaterials Purchases";
+        $this->data['todaySubTitle'] = "Check all Raw Materials Invoices registered on " . Carbon::today()->format('d/M/Y');
+
+        //Same cols and atts for both
+        $this->data['cols'] = ['#', 'Date', 'Supplier Name', 'KGs', 'Cost', 'Paid'];
+        $this->data['atts'] = [
+            'id',
+            ['date' => ['att' => 'created_at']],
+            ['foreignUrl' => ['suppliers/profile', 'RINC_SUPP_ID', 'supplier', 'SUPP_NAME']],
+            ["number" => ['att' => 'RINC_KGS', 'nums' => 2]],
+            ["number" => ['att' => 'RINC_COST', 'nums' => 2]],
+            ["number" => ['att' => 'RINC_PAID', 'nums' => 2]],
+        ];
+        //form
+        $this->data['formTitle'] = "Add New Invoice";
+        $this->data['formURL'] = url('invoice/insert');
+        $this->data['suppliers'] = Supplier::all();
+        $this->data['raws'] = RawMaterial::all();
+
+        //totals
+        $carbonDate = Carbon::today();
+        $this->data['paidToday'] = RawInvoice::whereDate('created_at', $carbonDate)->sum('RINC_PAID');
+        $this->data['paidMonth'] = RawInvoice::whereYear('created_at', $carbonDate->format('Y'))->whereMonth('created_at', $carbonDate->format('m'))->sum('RINC_PAID');
+    }
+
     public function __construct()
     {
         $this->middleware("auth");
+    }
+
+    public function invoices()
+    {
+        $this->initInvoicesArr();
+        return view('raw.invoices', $this->data);
     }
 
     public function stock()
@@ -70,11 +114,10 @@ class RawMaterialsController extends Controller
         $data['totalKG'] = $data['raws']->sum('RWMT_BLNC');
         $data['averagePrice'] = $data['raws']->average('RWMT_COST');
         $data['totalCost'] = $data['totalKG'] * $data['averagePrice'];
-        
-        
+
+
         return view('raw.stock', $data);
     }
-
 
     public function entry()
     {
@@ -88,7 +131,6 @@ class RawMaterialsController extends Controller
     public function insertEntry(Request $request)
     {
         $request->validate([
-            "desc" => "required",
             "in" => "nullable|numeric",
             "price" => "nullable|numeric",
             "out" => "nullable|numeric",
@@ -96,8 +138,47 @@ class RawMaterialsController extends Controller
             "raw" => "required|exists:raw_materials,id"
         ]);
         $raw = RawMaterial::findOrFail($request->raw);
-        $raw->addEntry($request->desc, $request->in, $request->out, $request->supplier, $request->price, $request->comment);
+        $raw->addEntry($request->in, $request->out, $request->supplier, $request->price, $request->comment);
         return redirect("rawmaterials/stock");
+    }
+
+    public function insertInvoice(Request $request)
+    {
+        $request->validate([
+            'supplier' => 'required|exists:suppliers,id',
+            'delivery' => 'required|numeric',
+            'payment' => 'required|numeric'
+        ]);
+
+        $invoice = new RawInvoice();
+        $invoice->RINC_SUPP_ID = $request->supplier;
+        $invoice->RINC_DASH_ID = Auth::id();
+        $invoice->RINC_PAID = $request->payment;
+        $invoice->RINC_DLVR_FEES = $request->delivery;
+        $invoice->RINC_CMNT = $request->comment;
+
+        DB::transaction(function () use ($invoice, $request) {
+            $invoice->save();
+            $totalPrice = 0;
+            $totalKGs = 0;
+            foreach ($request->raw as $i => $row) {
+                $rawItem = RawMaterial::findOrFail($row);
+                $rawItem->addEntry($request->in[$i], 0, $invoice->RINC_SUPP_ID, $request->price[$i], "Invoice Entry", $invoice->id, false);
+                $rawItem->save();
+                $totalKGs += $request->in[$i];
+                $totalPrice += $request->price[$i] * $request->in[$i];
+            }
+            $invoice->RINC_KGS = $totalKGs;
+            $invoice->RINC_COST = $totalPrice;
+            $supplier =  Supplier::findOrFail($request->supplier);
+            $supplier->addInvoice($invoice->RINC_COST, "Invoice Number " . $invoice->id);
+            if($request->payment > 0){
+                Cash::entry("Invoice# " . $invoice->id . " Payment to " . $supplier->SUPP_NAME, 0, $request->payment, "Added Automatically from invoices page");
+                $supplier->pay($request->payment, "Invoice# " . $invoice->id . " Payment");
+            }
+            $invoice->save();
+        });
+        return redirect('accounts/invoices');
     }
 
 
