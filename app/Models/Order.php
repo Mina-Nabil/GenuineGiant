@@ -43,6 +43,11 @@ class Order extends Model
         return $this->belongsTo("App\Models\Driver", "ORDR_DRVR_ID", "id");
     }
 
+    public function slot()
+    {
+        return $this->belongsTo("App\Models\DeliverySlot", "ORDR_DSLT_ID", "id");
+    }
+
     public function paymentOption()
     {
         return $this->belongsTo("payment_options", "ORDR_AREA_ID", "id");

@@ -41,6 +41,26 @@ class SuppliersController extends Controller
         $this->data['homeURL'] = $this->homeURL;
     }
 
+    private function initTransArr() // 0 all - 1 latest - 2 top
+    {
+        //Pay table
+        $this->data['title'] = "All Suppliers Transactions";
+        $this->data['items'] = SupplierPayment::with('supplier', 'dash_user')->orderByDesc('id')->get();
+        $this->data['subTitle'] = "Check Latest payments all suppliers ";
+        $this->data['cols'] = ['Date', 'Supplier', 'Paid By', 'In', 'Out', 'Balance', 'Comment'];
+        $this->data['atts'] = [
+            ['date' => ['att' => 'created_at']],
+            ['foreign' => ['supplier', 'SUPP_NAME']],
+            ['foreign' => ['dash_user', 'DASH_USNM']],
+            ["number" => ['att' => 'SPPY_RCVD', 'nums' => 2]],
+            ["number" => ['att' => 'SPPY_PAID', 'nums' => 2]],
+            ["number" => ['att' => 'SPPY_BLNC', 'nums' => 2]],
+            ["comment" => ['att' => 'SPPY_CMNT']],
+        ];
+
+        $this->data['homeURL'] = $this->homeURL;
+    }
+
     private function initAddArr($supplierID = -1)
     {
         if ($supplierID != -1) {
@@ -114,6 +134,12 @@ class SuppliersController extends Controller
     public function home()
     {
         $this->initHomeArr(0);
+        return view("suppliers.table", $this->data);
+    }
+
+    public function trans()
+    {
+        $this->initTransArr();
         return view("suppliers.table", $this->data);
     }
 

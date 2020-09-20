@@ -19,13 +19,13 @@
                         <div class="input-group mb-3">
                             <select name=guest id=guest class="form-control custom-select" style="width: 100%; height:36px;" onchange="toggleGuest()" required>
                                 <option value=1 @if(old('guest')==1) selected @endif>Guest</option>
-                                <option value=2 @if(old('guest')==2) selected @endif>Registered User</option>
+                                <option value=2 @if(old('guest')!=1) selected @endif>Registered User</option>
                             </select>
                         </div>
                         <small class="text-danger">{{$errors->first('guest')}}</small>
                     </div>
 
-                    <div id=isuser style="display: none">
+                    <div id=isuser style="display: block">
                         <input type="hidden" name=client id=userID>
                         <div class="form-group">
                             <label>Clients</label>
@@ -46,7 +46,7 @@
                         </div>
                     </div>
 
-                    <div id=isguest style="display: block">
+                    <div id=isguest style="display: none">
                         <div class="form-group">
                             <label>Guest Name</label>
                             <div class="input-group mb-3">
@@ -67,7 +67,7 @@
                     <div class="form-group">
                         <label>Area</label>
                         <div class="input-group mb-3">
-                            <select name=area id=areaSel class="select2 form-control custom-select" style="width: 100%; height:36px;" required>
+                            <select name=area id=areaSel class="select2 form-control custom-select" style="width: 100%; height:36px;" onchange="getAreaRate()" required>
                                 <option value="" disabled selected>Pick From Areas</option>
                                 @foreach($areas as $area)
                                 <option value="{{ $area->id }}" @if(old('area')==$area->id)
@@ -78,6 +78,14 @@
                             </select>
                         </div>
                         <small class="text-danger">{{$errors->first('area')}}</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Delivery Cost</label>
+                        <div class="input-group mb-3">
+                            <input type="number" step=0.01 id=delCost class="form-control" placeholder="Guest Mobile Number" name=delCost value="{{ old('delCost')}}" required>
+                        </div>
+                        <small class="text-danger">{{$errors->first('delCost')}}</small>
                     </div>
 
                     <div class="form-group">
@@ -139,7 +147,7 @@
 
                             <div class="col-lg-3">
                                 <div class="input-group mb-3">
-                                    <input list=as3ar1 id=price1 type="number" step="0.01" class="form-control amount" placeholder="Price"  name=price[] aria-describedby="basic-addon11" required>
+                                    <input list=as3ar1 id=price1 type="number" step="0.01" class="form-control amount" placeholder="Price" name=price[] aria-describedby="basic-addon11" required>
                                     <datalist id=as3ar1></datalist>
                                 </div>
                             </div>
@@ -167,7 +175,9 @@
 @endsection
 
 @section('js_content')
+<script src="{{ asset('assets/node_modules/toast-master/js/jquery.toast.js') }}"></script>
 <script>
+    
     var room = 1;
    function addToab() {
    
@@ -218,6 +228,41 @@
     $('.removeclass' + rid).remove();
 
     }
+
+    function getAreaRate(){
+        areaSel = document.getElementById('areaSel')
+        areaID = areaSel.options[areaSel.selectedIndex].value;
+
+        var http = new XMLHttpRequest();
+        var url = "{{url('api/get/area/rate')}}";
+        http.open('POST', url, true);
+
+        var formdata = new FormData();
+        formdata.append('id',areaID);
+        formdata.append('_token','{{ csrf_token() }}');
+
+        http.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            try {        
+                rate = JSON.parse(this.responseText);
+                priceText = document.getElementById('delCost');
+                priceText.value = rate['price'];
+                $.toast({
+                    heading: 'Area Rate Updated',
+                    text: 'Area Rate updated automatically based on your selection.',
+                    position: 'top-right',
+                    loaderBg:'#ff6849',
+                    icon: 'success',
+                    hideAfter: 3000, 
+                    stack: 6
+                 });
+            } catch(e){
+                console.log(e); 
+            }
+        } 
+        };
+        http.send(formdata, true);
+    }
    
    function changePrices(callerID) {
     itemIndex = callerID.id.substring(9, callerID.id.length);
@@ -245,7 +290,15 @@
             listtt.innerHTML += '<option value="' + prices['retail'] + '">Retail Price: ' + prices['retail'] + '</option>';
             listtt.innerHTML += '<option value="' + prices['whole'] + '">Whole Price: ' + prices['whole'] + '</option>';
             listtt.innerHTML += '<option value="' + prices['inside'] + '">Inside Price: ' + prices['inside'] + '</option>';
-           
+            $.toast({
+                    heading: 'Item Price Updated',
+                    text: 'Item Prices updated automatically based on your selection.',
+                    position: 'top-right',
+                    loaderBg:'#ff6849',
+                    icon: 'success',
+                    hideAfter: 3000, 
+                    stack: 6
+                 });
         } catch(e){
             console.log(e); 
         }
@@ -299,7 +352,15 @@
             if(typeof userInfo[2] !== 'undefined'){
             var userAdrs = document.getElementById("userAdrs");
             userAdrs.innerHTML =  userInfo[2]       
-
+            $.toast({
+                    heading: 'User Data Loaded',
+                    text: 'User Data updated automatically based on your selection.',
+                    position: 'top-right',
+                    loaderBg:'#ff6849',
+                    icon: 'success',
+                    hideAfter: 3000, 
+                    stack: 6
+                 });
             }
 
         }

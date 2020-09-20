@@ -7,6 +7,7 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">{{ $formTitle }}</h4>
+                <h5 class="card-subtitle">Insert a new Production entry, after entry the ingredients will be calculated for raw materials consumptions</h5>
                 <form class="form pt-3" method="post" action="{{ url($formURL) }}" enctype="multipart/form-data">
                     @csrf
                     <div class="row ">

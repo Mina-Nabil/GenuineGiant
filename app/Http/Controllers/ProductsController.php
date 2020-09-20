@@ -112,11 +112,10 @@ class ProductsController extends Controller
 
         $this->data['title'] = "Items Available";
         $this->data['subTitle'] = "View Current Stock for (" . $product->PROD_NAME . ")";
-        $this->data['cols'] = ['Production Date', 'Amount'];
+        $this->data['cols'] = ['Latest Entry', 'Amount'];
         $this->data['atts'] = [
-            ['date' => ['att' => 'created_at', 'format' => "Y-M-d"]],
-            ['number' => ['att' => 'INVT_AMNT', 'nums' => 2]],
-            'INVT_CUNT'
+            ['date' => ['att' => 'updated_at', 'format' => "Y-M-d H:i"]],
+            ['number' => ['att' => 'INVT_KGS', 'nums' => 2]],
         ];
         //raw materials
         $this->data['rawItems'] = $product->ingredients()->get();

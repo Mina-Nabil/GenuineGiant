@@ -58,6 +58,7 @@ Route::post("inventory/insert/entry", "InventoryController@insert");
 Route::get("inventory/current/stock", "InventoryController@stock");
 Route::get("inventory/transactions", "InventoryController@transactions");
 Route::get("inventory/transaction/{code}", "InventoryController@transactionDetails");
+Route::post("raw/used/insert", "InventoryController@consumeRaw");
 
 //Products 
 Route::get('products/show/all', 'ProductsController@home');
@@ -91,7 +92,7 @@ Route::post('clients/update', 'ClientsController@update');
 Route::get('paymentoptions/show', 'PaymentOptionsController@home');
 Route::get('paymentoptions/toggle/{id}', 'PaymentOptionsController@toggle');
 
-//Areas
+//Drivers
 Route::get('drivers/show', 'DriversController@home');
 Route::get('drivers/edit/{id}', 'DriversController@edit');
 Route::get('drivers/toggle/{id}', 'DriversController@toggle');
@@ -104,6 +105,13 @@ Route::get('areas/edit/{id}', 'AreasController@edit');
 Route::get('areas/toggle/{id}', 'AreasController@toggle');
 Route::post('areas/insert', 'AreasController@insert');
 Route::post('areas/update', 'AreasController@update');
+
+//Delivery Slots
+Route::get('slots/show', 'DeliverySlotController@home');
+Route::get('slots/edit/{id}', 'DeliverySlotController@edit');
+Route::get('slots/toggle/{id}', 'DeliverySlotController@toggle');
+Route::post('slots/insert', 'DeliverySlotController@insert');
+Route::post('slots/update', 'DeliverySlotController@update');
 
 //Tags
 Route::get('rawmaterials/entry/new', 'RawMaterialsController@entry');
@@ -134,6 +142,7 @@ Route::post("dash/users/update", 'DashUsersController@update');
 
 //Suppliers users
 Route::get("suppliers/show/all", 'SuppliersController@home');
+Route::get("suppliers/show/trans", 'SuppliersController@trans');
 Route::get("suppliers/add", 'SuppliersController@add');
 Route::post("suppliers/insert", 'SuppliersController@insert');
 Route::get("suppliers/edit/{id}", 'SuppliersController@edit');
@@ -143,6 +152,7 @@ Route::post("suppliers/pay", 'SuppliersController@pay');
 
 
 Route::post('api/get/product/prices', 'ApiController@getProductPrices');
+Route::post('api/get/area/rate', 'ApiController@getAreaPrice');
 
 
 Route::get('logout', 'HomeController@logout')->name('logout');

@@ -76,5 +76,17 @@ class DatabaseSeeder extends Seeder
             "PYOP_NAME" => "Credit Card On Delivery",
             "PYOP_ARBC_NAME" => "بطاقه ائتمان عند التوصيل"
         ]);
+
+        DB::table("delivery_slots")->insert([
+            "DSLT_NAME" => "First Shift",
+            "DSLT_STRT" => "09:00:00",
+            "DSLT_END" => "12:00:00",
+        ]);
+
+        DB::table("delivery_slots")->insert([
+            "DSLT_NAME" => "Second Shift",
+            "DSLT_STRT" => "12:00:00",
+            "DSLT_END" => "15:00:00",
+        ]);
     }
 }

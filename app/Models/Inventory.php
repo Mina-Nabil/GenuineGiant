@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,11 +33,15 @@ class Inventory extends Model
     {
         $transactionCode = date_format(now(), "ymdHis");
         $date = date_format(now(), "Y-m-d H:i:s");
-        return DB::transaction(function () use ($entryArr, $transactionCode, $orderID, $date, $orderIn, $comment, $reflectOnRaw) {
-            foreach ($entryArr as $row) {
-                self::insert($row['modelID'], (($orderID == null) || $orderIn) ? $row['count'] : -1 * $row['count'], $transactionCode, $orderID, $date, $orderIn, $comment, $reflectOnRaw);
-            }
-        });
+        try{
+            return DB::transaction(function () use ($entryArr, $transactionCode, $orderID, $date, $orderIn, $comment, $reflectOnRaw) {
+                foreach ($entryArr as $row) {
+                    self::insert($row['modelID'], (($orderID == null) || $orderIn) ? $row['count'] : -1 * $row['count'], $transactionCode, $orderID, $date, $orderIn, $comment, $reflectOnRaw);
+                }
+            });
+        } catch (Exception $e){
+            return false;
+        }
     }
 
     static public function insert($modelID, $count, $transactionCode, $orderID = null, $date = null, $orderIn = false, $comment=null, $reflectOnRaw=false)

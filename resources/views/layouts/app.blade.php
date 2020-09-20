@@ -26,6 +26,8 @@
     <link href="{{ asset('assets/node_modules/dropify/dist/css/dropify.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/node_modules/bootstrap-datepicker/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/node_modules/select2/dist/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/node_modules/toast-master/css/jquery.toast.css') }}" rel="stylesheet" type="text/css" />
+
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Oregano" />
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Oswald" />
@@ -194,7 +196,8 @@
                     
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Suppliers</span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('suppliers/show/all')}}">Show All</a></li>
+                                <li><a href="{{url('suppliers/show/all')}}">All Suppliers</a></li>
+                                <li><a href="{{url('suppliers/show/trans')}}">Transactions</a></li>
                                 <li><a href="{{url('suppliers/add')}}">Add Supplier</a></li>
                             </ul>
                         </li>
@@ -231,6 +234,7 @@
                                     <ul aria-expanded="false" class="collapse">
                                         <li><a href="{{url('areas/show')}}">Areas</a></li>
                                         <li><a href="{{url('drivers/show')}}">Drivers</a></li>
+                                        <li><a href="{{url('slots/show')}}">Delivery Slots</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>

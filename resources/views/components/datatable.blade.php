@@ -124,7 +124,7 @@
                     buttons: [
                         {
                             extend: 'excel',
-                            title: 'Whale Dashboard',
+                            title: 'Genuine Giant',
                             footer: true,
                         }
                     ]
