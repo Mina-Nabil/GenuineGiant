@@ -216,7 +216,7 @@
                                 </li>
                                 <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Inventory Items</a>
                                     <ul aria-expanded="false" class="collapse">
-                                        <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Catalogue</a>
+                                        <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> End Products</a>
                                             <ul aria-expanded="false" class="collapse">
                                                 <li><a href="{{url('products/show/all')}}">All Products</a></li>
                                                 <li><a href="{{url('products/filter/category')}}">By Category</a></li>
