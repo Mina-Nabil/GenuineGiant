@@ -213,20 +213,7 @@
                             </ul>
                         </li>
 
-                        <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-list"></i><span class="hide-menu"> Catalogue</span></a>
-                            <ul aria-expanded="false" class="collapse">
-
-                                <li>
-                                    <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Products</a>
-                                    <ul aria-expanded="false" class="collapse">
-                                        <li><a href="{{url('products/show/all')}}">All Products</a></li>
-                                        <li><a href="{{url('products/filter/category')}}">By Category</a></li>
-                                        <li><a href="{{url('products/add')}}">Add a Product</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="{{url('categories/show')}}">Categories</a></li>
-                            </ul>
-                        </li>
+                       
 
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cogs"></i><span class="hide-menu"> Settings </span></a>
                             <ul aria-expanded="false" class="collapse">
@@ -235,6 +222,13 @@
                                         <li><a href="{{url('areas/show')}}">Areas</a></li>
                                         <li><a href="{{url('drivers/show')}}">Drivers</a></li>
                                         <li><a href="{{url('slots/show')}}">Delivery Slots</a></li>
+                                    </ul>
+                                </li>
+                                <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Catalogue</a>
+                                    <ul aria-expanded="false" class="collapse">
+                                        <li><a href="{{url('products/show/all')}}">All Products</a></li>
+                                        <li><a href="{{url('products/filter/category')}}">By Category</a></li>
+                                        <li><a href="{{url('products/add')}}">Add a Product</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
