@@ -31,6 +31,15 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Mobile Number 2</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Mobile Number 2" name=mob2 value="{{ (isset($client)) ? $client->CLNT_MOB2 : old('mob2') }}" >
+                        </div>
+
+                        <small class="text-danger">{{$errors->first('mob2')}}</small>
+                    </div>
+
+                    <div class="form-group">
                         <label>Balance</label>
                         <div class="input-group mb-3">
                             <input type="number" step="0.01" class="form-control" placeholder="Client Balance, amount of money we have to collect from him" name=balance

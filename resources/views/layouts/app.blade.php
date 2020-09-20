@@ -151,8 +151,11 @@
                     </div>
                 </div>
                 <!-- Sidebar navigation-->
+             <?php $modules = Auth::user()->modules()->pluck('MDUL_NAME')->all(); ?>
                 <nav class="sidebar-nav">
                     <ul id="sidebarnav">
+                        @if (in_array('Orders', $modules))          
+                      
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cart-plus"></i><span class="hide-menu">Orders</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('orders/active')}}">Active Orders</a></li>
@@ -162,6 +165,8 @@
                             </ul>
                         </li>
 
+                        @endif
+                        @if (in_array('Stock', $modules))  
                         <li>
                             <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-boxes"></i><span class="hide-menu"> Stock</span></a>
                             <ul aria-expanded="false" class="collapse">
@@ -172,7 +177,8 @@
                                 <li><a href="{{url('rawmaterials/entry/new')}}"> Raw Material Entry</a></li>
                             </ul>
                         </li>
-
+                        @endif
+                        @if (in_array('Clients', $modules))  
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Clients</span></a>
                             <ul aria-expanded="false" class="collapse">
 
@@ -180,7 +186,8 @@
                                 <li><a href="{{url('clients/add')}}">Add Client</a></li>
                             </ul>
                         </li>
-
+                        @endif
+                        @if (in_array('Reports', $modules))  
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-chart-bar"></i><span class="hide-menu"> Reports</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('suppliers/trans/prepare')}}">Inventory</a></li>
@@ -188,14 +195,16 @@
                                 <li><a href="{{url('suppliers/show')}}">Users</a></li>
                             </ul>
                         </li>
-
+                        @endif
+                        @if (in_array('Accounts', $modules))  
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-book"></i><span class="hide-menu"> Accounts</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('accounts/cash')}}">Cash</a></li>
                                 <li><a href="{{url('accounts/invoices')}}">Raw Invoices</a></li>
                             </ul>
                         </li>
-
+                        @endif
+                        @if (in_array('Suppliers', $modules))  
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu"> Suppliers</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('suppliers/show/all')}}">All Suppliers</a></li>
@@ -203,10 +212,10 @@
                                 <li><a href="{{url('suppliers/add')}}">Add Supplier</a></li>
                             </ul>
                         </li>
+                        @endif
 
 
-
-
+                        @if (in_array('Settings', $modules))  
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cogs"></i><span class="hide-menu"> Settings </span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Delivery</a>
@@ -235,8 +244,15 @@
                                 <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
                             </ul>
                         </li>
-                        <li> <a href="{{url('dash/users/all')}}"><i class=" fas fa-users"></i><span class="hide-menu">Dashboard Admins</span></a></li>
-
+                        @endif
+                        @if (in_array('Dashboard Admins', $modules))  
+                        <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"><i class=" fas fa-users"></i><span class="hide-menu"> Dashboard Admins</span></a>
+                            <ul aria-expanded="false" class="collapse">
+                             <li><a href="{{url('dash/users/all')}}"> All Users</a></li>
+                             <li><a href="{{url('dash/privileges')}}"> Privileges</a></li>
+                            </ul>
+                        </li>
+                        @endif
                     </ul>
                 </nav>
                 <!-- End Sidebar navigation -->

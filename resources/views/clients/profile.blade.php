@@ -11,7 +11,7 @@
                 <small class="text-muted">Client Name </small>
                 <h6>{{$client->CLNT_NAME}}</h6>
                 <small class="text-muted p-t-30 db">Phone</small>
-                <h6>{{$client->CLNT_MOBN}}</h6>
+                <h6>{{$client->CLNT_MOBN}} / {{$client->CLNT_MOB2 ?? ''}}</h6>
                 <small class="text-muted p-t-30 db">Area</small>
                 <h6>{{$client->area->AREA_NAME}}</h6>
                 <small class="text-muted p-t-30 db">Address</small>
@@ -170,6 +170,16 @@
 
                                 <small class="text-danger">{{$errors->first('mob')}}</small>
                             </div>
+
+                            <div class="form-group">
+                                <label>Mobile Number 2</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Mobile Number 2" name=mob2 value="{{ (isset($client)) ? $client->CLNT_MOB2 : old('mob2') }}" >
+                                </div>
+        
+                                <small class="text-danger">{{$errors->first('mob2')}}</small>
+                            </div>
+
                             <div class="form-group">
                                 <label>Balance</label>
                                 <div class="input-group mb-3">

@@ -20,6 +20,7 @@ class SuppliersController extends Controller
     public function __construct()
     {
         $this->middleware("auth");
+        $this->middleware("\App\Http\Middleware\CheckType");
     }
 
     private function initHomeArr($type = -1) // 0 all - 1 latest - 2 top

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Area;
-use App\Models\Gender;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Client;
@@ -20,6 +19,7 @@ class ClientsController extends Controller
     public function __construct()
     {
         $this->middleware("auth");
+        $this->middleware("\App\Http\Middleware\CheckType");
     }
 
     private function initHomeArr($type = -1) // 0 all - 1 latest - 2 top
@@ -37,7 +37,7 @@ class ClientsController extends Controller
         $this->data['atts'] = [
             'id',
             ['attUrl' => ["url" => 'clients/profile', "urlAtt" => 'id', "shownAtt" =>  "CLNT_NAME"]],
-            'CLNT_MOB',
+            'CLNT_MOBN',
             ['number' => ['att' => 'CLNT_BLNC']],
             ['foreign' => ['area', 'AREA_NAME']],
             ['date' => ['att' => 'created_at', 'format' => 'Y-M-d']],
@@ -183,8 +183,8 @@ class ClientsController extends Controller
     public function insert(Request $request)
     {
         $request->validate([
-            "name"              => ["required", new Triplename],
-            "mob"               => "required|numeric",
+            "name"              => ["required", new Triplename, Rule::unique('clients', "CLNT_NAME")],
+            "mob"               => "required|numeric|unique:clients,CLNT_MOBN",
             "avg"               => "nullable|numeric",
             "long"               => "nullable|numeric",
             "latt"               => "nullable|numeric",
@@ -195,6 +195,7 @@ class ClientsController extends Controller
         $client->CLNT_NAME = $request->name;
         $client->CLNT_ADRS = $request->address;
         $client->CLNT_MOBN = $request->mob;
+        $client->CLNT_MOB2 = $request->mob2;
         $client->CLNT_BLNC = $request->balance ?? 0;
         $client->CLNT_AREA_ID = $request->area;
         $client->CLNT_LATT = $request->latt;
@@ -213,8 +214,8 @@ class ClientsController extends Controller
         ]);
         $client = Client::findOrFail($request->id);
         $request->validate([
-            "name"          => ["required", "string", new Triplename],
-            "mob"           => "required|numeric",
+            "name"          => ["required", "string", new Triplename,  Rule::unique('clients', "CLNT_NAME")->ignore($client->CLNT_NAME, "CLNT_NAME"),],
+            "mob"           => ["required", "numeric",  Rule::unique('clients', "CLNT_MOBN")->ignore($client->CLNT_MOBN, "CLNT_MOBN")],
             "area"          => "required|exists:areas,id",
             "avg"               => "nullable|numeric",
             "long"               => "nullable|numeric",
@@ -224,6 +225,7 @@ class ClientsController extends Controller
         $client->CLNT_NAME = $request->name;
         $client->CLNT_ADRS = $request->address;
         $client->CLNT_MOBN = $request->mob;
+        $client->CLNT_MOB2 = $request->mob2;
         $client->CLNT_BLNC = $request->balance ?? 0;
         $client->CLNT_AREA_ID = $request->area;
         $client->CLNT_LATT = $request->latt;

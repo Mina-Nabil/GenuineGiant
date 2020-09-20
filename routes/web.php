@@ -139,8 +139,11 @@ Route::get("dash/users/all", 'DashUsersController@index');
 Route::post("dash/users/insert", 'DashUsersController@insert');
 Route::get("dash/users/edit/{id}", 'DashUsersController@edit');
 Route::post("dash/users/update", 'DashUsersController@update');
+//Privileges
+Route::get("dash/privileges", 'DashUsersController@privileges');
+Route::post("dash/privileges/update", 'DashUsersController@updatePrivileges');
 
-//Suppliers users
+//Suppliers
 Route::get("suppliers/show/all", 'SuppliersController@home');
 Route::get("suppliers/show/trans", 'SuppliersController@trans');
 Route::get("suppliers/add", 'SuppliersController@add');

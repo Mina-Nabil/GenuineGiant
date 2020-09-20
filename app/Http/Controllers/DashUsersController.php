@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\DashType;
 use App\Models\DashUser;
+use App\Models\Module;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashUsersController extends Controller
 {
@@ -14,6 +16,7 @@ class DashUsersController extends Controller
     public function __construct()
     {
         $this->middleware("auth");
+        $this->middleware("\App\Http\Middleware\CheckType");
     }
 
     private function initDataArr()
@@ -103,5 +106,25 @@ class DashUsersController extends Controller
         $dashUser->save();
 
         return redirect("dash/users/all");
+    }
+
+    //////////privileges
+
+    public function privileges(){
+        $data['types'] = DashType::with("modules")->get();
+        $data['modules'] = Module::all();
+
+        $data['formTitle'] = "Manage Dashboard Privileges";
+        $data['formURL'] = url('dash/privileges/update');
+
+        return view('auth.privileges', $data);
+    }
+
+    public function updatePrivileges(Request $request){
+        $types = DashType::all();
+        foreach($types as $type){
+            $type->modules()->sync($request->{$type->DHTP_NAME});
+        }
+        return redirect('dash/privileges');
     }
 }

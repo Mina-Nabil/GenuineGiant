@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Area;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class AreasController extends Controller
@@ -45,6 +46,7 @@ class AreasController extends Controller
     public function __construct()
     {
         $this->middleware("auth");
+        $this->middleware("\App\Http\Middleware\CheckType");
     }
 
     public function home()
