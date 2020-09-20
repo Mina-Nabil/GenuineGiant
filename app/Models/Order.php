@@ -175,7 +175,7 @@ class Order extends Model
             ->Leftjoin("order_items", "ORIT_ORDR_ID", "=", "orders.id")
             ->join("payment_options", "ORDR_PYOP_ID", "=", "payment_options.id")
             ->select("orders.*", "order_status.STTS_NAME", "dash_users.DASH_USNM", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount")
-            ->groupBy("orders.id", "orders.ORDR_STTS_ID", "orders.ORDR_CLNT_ID", "orders.ORDR_OPEN_DATE", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME");
+            ->groupBy("orders.id", "orders.ORDR_STTS_ID", "orders.ORDR_CLNT_ID", "orders.ORDR_OPEN_DATE","orders.ORDR_DLVR_DATE", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME");
     }
 
     public function addTimeline($text, $isdash = true)
