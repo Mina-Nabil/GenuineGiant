@@ -33,7 +33,7 @@
                         <label>Category*</label>
                         <div class="input-group mb-3">
                             <select name=category class="select2 form-control custom-select" style="width: 100%; height:36px;" required>
-                                <option value="" disabled selected >Pick From Categories</option>
+                                <option value="" disabled selected >Main Categories</option>
                                 @foreach($categories as $categry)
                                 <option value="{{ $categry->id }}"
                                 @if(isset($subcategory) && $categry->id == $subcategory->SBCT_CATG_ID)
