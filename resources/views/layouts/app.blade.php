@@ -227,7 +227,7 @@
                                     <ul aria-expanded="false" class="collapse">
                                         <li><a href="{{url('products/show/all')}}">All Products</a></li>
                                         <li><a href="{{url('products/filter/category')}}">By Category</a></li>
-                                        <li><a href="{{url('products/add')}}">Add a Product</a></li>
+                                        <li><a href="{{url('products/add')}}">Add Product</a></li>
                                         <li><a href="{{url('categories/show')}}">Categories</a></li>
                                     </ul>
                                 </li>
