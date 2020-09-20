@@ -163,11 +163,13 @@
                         </li>
 
                         <li>
-                            <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-boxes"></i><span class="hide-menu"> Inventory</span></a>
+                            <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-boxes"></i><span class="hide-menu"> Stock</span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('inventory/current/stock')}}">Current Stock List</a></li>
-                                <li><a href="{{url('inventory/entry/new')}}">Add New Stock</a></li>
-                                <li><a href="{{url('inventory/transactions')}}">Transactions</a></li>
+                                <li><a href="{{url('inventory/current/stock')}}">End Product Stock</a></li>
+                                <li><a href="{{url('inventory/entry/new')}}">Add End Product Stock</a></li>
+                                <li><a href="{{url('inventory/transactions')}}">End Product Stock Transactions</a></li>
+                                <li><a href="{{url('rawmaterials/stock')}}"> Raw Material Stock</a></li>
+                                <li><a href="{{url('rawmaterials/entry/new')}}"> Raw Material Entry</a></li>
                             </ul>
                         </li>
 
@@ -225,13 +227,9 @@
                                             </ul>
                                         </li>
 
-                                        <li><a class="has-arrow waves-effect waves-dark" href="javascript:void(0)"> Raw Materials</a>
-                                            <ul aria-expanded="false" class="collapse">
-                                                <li><a href="{{url('rawmaterials/stock')}}"> Stock</a></li>
-                                                <li><a href="{{url('rawmaterials/entry/new')}}"> Inventory Entry</a></li>
-                                                <li><a href="{{url('rawmaterials/show')}}">Show All</a></li>
-                                            </ul>
-                                        </li>
+
+                                        <li><a href="{{url('rawmaterials/show')}}">Raw Materials</a></li>
+
                                     </ul>
                                 </li>
                                 <li><a href="{{url('paymentoptions/show')}}">Payment Options</a></li>
