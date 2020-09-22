@@ -156,6 +156,7 @@ Route::post("suppliers/pay", 'SuppliersController@pay');
 
 Route::post('api/get/product/prices', 'ApiController@getProductPrices');
 Route::post('api/get/area/rate', 'ApiController@getAreaPrice');
+Route::post('api/get/raw/supp/price', 'ApiController@getSupplyPrice');
 
 
 Route::get('logout', 'HomeController@logout')->name('logout');

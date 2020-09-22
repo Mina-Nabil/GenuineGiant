@@ -7,6 +7,7 @@ use App\Models\RawInventory;
 use App\Models\RawInvoice;
 use App\Models\RawMaterial;
 use App\Models\Supplier;
+use App\MOdels\Supplies;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,7 +49,7 @@ class RawMaterialsController extends Controller
         //Same cols and atts for both
         $this->data['cols'] = ['#', 'Date', 'Supplier Name', 'KGs', 'Cost', 'Paid'];
         $this->data['atts'] = [
-            'id',
+            ['verified' => ['att' => 'id', 'isVerified' => 'RINC_VRFD']],
             ['date' => ['att' => 'created_at']],
             ['foreignUrl' => ['suppliers/profile', 'RINC_SUPP_ID', 'supplier', 'SUPP_NAME']],
             ["number" => ['att' => 'RINC_KGS', 'nums' => 2]],
@@ -163,6 +164,10 @@ class RawMaterialsController extends Controller
             $totalPrice = 0;
             $totalKGs = 0;
             foreach ($request->raw as $i => $row) {
+                $dealPrice = Supplies::getSupplyPrice($request->supplier, $row);
+                if($dealPrice != -1 && $dealPrice < $request->price[$i]) {
+                    $invoice->RINC_VRFD = 0;
+                }
                 $rawItem = RawMaterial::findOrFail($row);
                 $rawItem->addEntry($request->in[$i], 0, $invoice->RINC_SUPP_ID, $request->price[$i], "Invoice Entry", $invoice->id, false);
                 $rawItem->save();

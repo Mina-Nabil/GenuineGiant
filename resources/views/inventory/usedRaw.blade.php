@@ -14,6 +14,7 @@
 
                     <?php $i=1;
                         $max = count($ingredients) ; ?>
+                        @if($max > 0)
                     @foreach ($ingredients as $rawID => $rawKG)
                     @if ($i == $max)
                     <div class="row ">
@@ -23,7 +24,7 @@
                             <div class="col-lg-8">
                                 <div class="input-group mb-2">
                                     <select name=raw[] class="form-control select2  custom-select" required>
-                                        <option disabled hidden selected value="">Products</option>
+                                        <option disabled hidden selected value="">Raw Materials</option>
                                         @foreach($raws as $item)
                                         <option value="{{ $item->id }}" @if ($item->id == $rawID)
                                             selected
@@ -51,6 +52,29 @@
                   
                     
                         @endforeach
+                        @else 
+                        <div class="row ">
+                            <div class="col-lg-8">
+                                <div class="input-group mb-2">
+                                    <select name=raw[] class="form-control select2  custom-select" required>
+                                        <option disabled hidden selected value="">Raw Materials</option>
+                                        @foreach($raws as $item)
+                                        <option value="{{ $item->id }}" >
+                                            {{$item->RWMT_NAME}} - {{$item->RWMT_ARBC_NAME}} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="input-group mb-3">
+                                    <input type="number" step=0.01 class="form-control amount" placeholder="KGs" name=count[] aria-describedby="basic-addon11" required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success" id="dynamicAddButton" type="button" onclick="addToab();"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         <hr>
                         <div id="dynamicContainer" class="nopadding row ">
                         </div>
@@ -96,10 +120,7 @@
                                 <select name=raw[] class="form-control select2  custom-select" required>\
                                     <option disabled hidden selected value="">Products</option>\
                                     @foreach($raws as $item)\
-                                    <option value="{{ $item->id }}" @if ($item->id == $rawID)\
-                                        selected\
-                                        @endif\
-                                        >\
+                                    <option value="{{ $item->id }}"  >\
                                         {{$item->RWMT_NAME}} - {{$item->RWMT_ARBC_NAME}} </option>\
                                     @endforeach\
                                 </select>\

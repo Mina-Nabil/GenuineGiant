@@ -53,8 +53,10 @@
                         @elseif(array_key_exists('verified', $att))
                         <td>{{ $item->{$att['verified']['att']}  }}
                             @if($item->{$att['verified']['isVerified']})
-                            <i class="fas fa-check-circle" style="color:lightgreen">
-                                @endif
+                                <i class="fas fa-check-circle" style="color:lightgreen">
+                            @else
+                                <i class=" fas fa-exclamation-circle" style="color:red">
+                            @endif
                         </td>
                         @elseif(array_key_exists('dynamicUrl', $att))
                         <td><a href="{{ url($att['dynamicUrl'][0].$item->{$att['dynamicUrl']['val']}) }}">{{ $item->{$att['dynamicUrl']['att']}  }}</a></td>

@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Gender;
 use App\Models\Order;
 use App\Models\RawInventory;
+use App\Models\RawMaterial;
 use Illuminate\Http\Request;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
@@ -30,14 +31,13 @@ class SuppliersController extends Controller
         $this->data['items'] = Supplier::all();
 
         $this->data['subTitle'] = "Manage Suppliers";
-        $this->data['cols'] = ['id', 'Full Name', 'Mob#', 'Balance', 'Supply', 'Edit'];
+        $this->data['cols'] = ['id', 'Full Name', 'Mob#', 'Balance', 'Supply'];
         $this->data['atts'] = [
             'id',
             ['attUrl' => ["url" => 'suppliers/profile', "urlAtt" => 'id', "shownAtt" =>  "SUPP_NAME"]],
             'SUPP_MOBN',
             ['number' => ['att' => 'SUPP_BLNC']],
-            ['comment' => ['att' => 'SUPP_BSNS']],
-            ['edit' => ['url' => 'suppliers/edit/', 'att' => 'id']]
+            ['comment' => ['att' => 'SUPP_BSNS']]
         ];
         $this->data['homeURL'] = $this->homeURL;
     }
@@ -70,6 +70,7 @@ class SuppliersController extends Controller
         } else {
             $this->data['formURL'] = "suppliers/insert/";
         }
+        $this->data['raws'] = RawMaterial::all();
         $this->data['formTitle'] = "Add New Supplier";
         $this->data['isCancel'] = true;
         $this->data['homeURL'] = $this->homeURL;
@@ -79,7 +80,8 @@ class SuppliersController extends Controller
     {
         //Stock table
         $this->data['supplier'] = Supplier::findOrFail($id);
-        $this->data['raws'] = $this->data['supplier']->getSuppliedRawMaterials();
+        $this->data['supplies'] =  $this->data['supplier']->getRegisteredRawMaterials();
+        $this->data['bought'] = $this->data['supplier']->getSuppliedRawMaterials();
         $this->data['rawTitle'] = "Supplied Raw Materials";
         $this->data['rawSubtitle'] = "Check all Raw Materials supplied by " . $this->data['supplier']->SUPP_NAME;
         $this->data['rawCols'] = ['Raw Material', 'Total KGs', 'Supplier Cost per KG'];
@@ -130,6 +132,12 @@ class SuppliersController extends Controller
         //payment form
         $this->data['formTitle'] = "Add Payment";
         $this->data['formURL'] = url('suppliers/pay');
+
+        //info data
+        $this->data['infoFormURL'] = url('suppliers/update');
+        $this->data['infoFormTitle'] = "Manage Supplier Info";
+        $this->data['raws'] = RawMaterial::all();
+        $this->data['isCancel'] = false;
     }
 
     public function home()
@@ -184,8 +192,14 @@ class SuppliersController extends Controller
         $supplier->SUPP_NAME = $request->name;
         $supplier->SUPP_MOBN = $request->mob;
         $supplier->SUPP_BLNC = $request->balance ?? 0;
-
-        $supplier->save();
+        $supplies = array();
+        foreach($request->raw as $i => $raw){
+            $supplies[$raw] = ['SPLS_PRCE' => $request->price[$i]];
+        }
+        DB::transaction(function () use ($supplier, $supplies){
+            $supplier->save();
+            $supplier->supplies()->sync($supplies);
+        });
 
         return redirect("suppliers/profile/" . $supplier->id);
     }
@@ -205,7 +219,14 @@ class SuppliersController extends Controller
         $supplier->SUPP_MOBN = $request->mob;
         $supplier->SUPP_BLNC = $request->balance ?? 0;
 
-        $supplier->save();
+        $supplies = array();
+        foreach($request->raw as $i => $raw){
+            $supplies[$raw] = ['SPLS_PRCE' => $request->price[$i]];
+        }
+        DB::transaction(function () use ($supplier, $supplies){
+            $supplier->save();
+            $supplier->supplies()->sync($supplies);
+        });
 
         return redirect("suppliers/profile/" . $supplier->id);
     }

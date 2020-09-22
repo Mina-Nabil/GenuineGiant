@@ -314,7 +314,7 @@
         return false;
     }
     return true;
-}
+    }
 
     function toggleGuest(){
     var selectaya = document.getElementById("guest");

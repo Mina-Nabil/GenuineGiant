@@ -93,30 +93,30 @@ class DatabaseSeeder extends Seeder
         //     "DSLT_END" => "15:00:00",
         // ]);
 
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Orders",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Stock",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Clients",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Reports",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Accounts",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Suppliers",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Settings",
-        ]);
-        DB::table("modules")->insert([
-            "MDUL_NAME" => "Dashboard Admins",
-        ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Orders",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Stock",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Clients",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Reports",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Accounts",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Suppliers",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Settings",
+        // ]);
+        // DB::table("modules")->insert([
+        //     "MDUL_NAME" => "Dashboard Admins",
+        // ]);
 
  
 

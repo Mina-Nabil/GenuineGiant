@@ -88,7 +88,7 @@
                                                 <div class="form-group">
                                                     <label>Supplier</label>
                                                     <div class="input-group mb-2">
-                                                        <select name=supplier class="form-control select2  custom-select" style="width:100% " required>
+                                                        <select name=supplier id=suppSel class="form-control select2  custom-select" style="width:100% " required>
                                                             <option disabled hidden selected value="">Pick from Saved Suppliers</option>
                                                             @foreach($suppliers as $supplier)
                                                             <option value="{{ $supplier->id }}" @if(old('supplier')==$supplier->id)
@@ -105,13 +105,10 @@
                                                 <h4 class="card-title">Invoice Items</h4>
                                                 <div class="row ">
 
-                                                    <div id="dynamicContainer" style="width: 100%">
-                                                    </div>
-
                                                     <div class="row col-lg-12">
                                                         <div class="col-lg-6">
                                                             <div class="input-group mb-2">
-                                                                <select name=raw[] class="form-control select2  custom-select" style="width:100% " required>
+                                                                <select name=raw[] class="form-control select2  custom-select" onchange="getPrice(1)" style="width:100% " required>
                                                                     <option disabled hidden selected value="">Pick from Raw Materials</option>
                                                                     @foreach($raws as $row)
                                                                     <option value="{{ $row->id }}">
@@ -135,6 +132,9 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    </div>
+
+                                                    <div id="dynamicContainer" style="width: 100%">
                                                     </div>
                                                 </div>
                                                 <hr>
@@ -207,7 +207,8 @@
 @endsection
 
 @section('js_content')
-<script>
+    <script src="{{ asset('assets/node_modules/toast-master/js/jquery.toast.js') }}"></script>
+    <script>
     var room = 1;
    function addToab() {
    
@@ -220,7 +221,7 @@
    concatString +=   '<div class="row col-lg-12">\
                         <div class="col-lg-6">\
                             <div class="input-group mb-2">\
-                                <select name=raw[] class="form-control select2  custom-select" style="width:100% " required>\
+                                <select name=raw[] class="form-control select2  custom-select" style="width:100% " onchange="getPrice('  + room +  ')" required>\
                                     <option disabled hidden selected value="">Pick from Raw Materials</option>\
                                     @foreach($raws as $row)\
                                     <option value="{{ $row->id }}">\
@@ -240,7 +241,7 @@
                             <div class="input-group mb-3">\
                                 <input type="number" class="form-control" step=0.01 placeholder="KG Price" name=price[] required>\
                                 <div class="input-group-append">\
-                                    <button class="btn btn-danger" type="button" onclick="removeToab(" + room + ");"><i class="fa fa-minus"></i></button>\
+                                    <button class="btn btn-danger" type="button" onclick="removeToab(' + room + ');"><i class="fa fa-minus"></i></button>\
                                 </div>\
                             </div>\
                         </div>\
@@ -255,7 +256,7 @@
 
    function removeToab(rid) {
     $('.removeclass' + rid).remove();
-
+    room--;
     }
 
     function payTotal(){
@@ -290,5 +291,68 @@
 
         return totalCost
     }
+
+    function getPrice(index){
+
+        index--;
+        selectaya = (document.getElementsByName('raw[]')).item(index)
+
+        rawID = selectaya.options[selectaya.selectedIndex].value;
+
+        suppSel = document.getElementById('suppSel');
+        suppID = suppSel.options[suppSel.selectedIndex].value;
+
+        suppName = suppSel.options[suppSel.selectedIndex].innerHTML;
+
+        var http = new XMLHttpRequest();
+        var url = "{{url('api/get/raw/supp/price')}}";
+        http.open('POST', url, true);
+
+        var formdata = new FormData();
+        formdata.append('rawID',rawID);
+        formdata.append('suppID',suppID);
+        formdata.append('_token','{{ csrf_token() }}');
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                try {     
+                
+                    res = JSON.parse(this.responseText);
+                
+                    price = res['price']
+                    if (price > 0){
+                        priceText = document.getElementsByName('price[]').item(index);
+                        console.log(priceText)
+                        priceText.value = price ;
+                        
+                        $.toast({
+                                heading: 'Item Price Updated',
+                                text: 'Item Prices updated automatically based on your deal with the supplier.',
+                                position: 'top-right',
+                                loaderBg:'#ff6849',
+                                icon: 'success',
+                                hideAfter: 3000, 
+                                stack: 6
+                            });
+                    } else {
+                        $.toast({
+                                heading: 'Failed to load price',
+                                text: 'Failed to find the deal for this item with \'' + suppName + '\'',
+                                position: 'top-right',
+                                loaderBg:'#DC143C',
+                                icon: 'error',
+                                hideAfter: 3000, 
+                                stack: 6
+                            });
+                    }
+                } catch(e){
+                    console.log(e); 
+                }
+            } 
+        };
+    http.send(formdata, true);
+    }
+
+    
 </script>
 @endsection

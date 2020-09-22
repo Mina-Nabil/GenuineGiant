@@ -36,14 +36,37 @@
                         </div>
                         <small class="text-danger">{{$errors->first('balance')}}</small>
                     </div>
+                    
+                    <hr>
 
-                    <div class="form-group">
-                        <label>Supplies</label>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Supplied Items (Chicken, Kebda..)" name=business value="{{ (isset($supplier)) ? $supplier->SUPP_BSNS : old('business') }}">
+                    <h4 class="card-title">Supplied Raw Materials</h4>
+                    <div class="row ">
+
+                        <div id="dynamicContainer" style="width: 100%">
                         </div>
 
-                        <small class="text-danger">{{$errors->first('balance')}}</small>
+                        <div class="row col-lg-12">
+                            <div class="col-lg-8">
+                                <div class="input-group mb-2">
+                                    <select name=raw[] class="form-control select2  custom-select" style="width:100% " required>
+                                        <option disabled hidden selected value="">Pick from Raw Materials</option>
+                                        @foreach($raws as $row)
+                                        <option value="{{ $row->id }}">
+                                            {{$row->RWMT_NAME}} - {{$row->RWMT_ARBC_NAME}} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="input-group mb-3">
+                                    <input type="number" class="form-control" step=0.01 placeholder="KG Price" name=price[] required>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-success" id="dynamicAddButton" type="button" onclick="addToab();"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
 
@@ -57,4 +80,55 @@
     </div>
 
 </div>
+@endsection
+
+@section('js_content')
+
+<script>
+    var room = 1;
+   function addToab() {
+   
+   room++;
+   var objTo = document.getElementById('dynamicContainer')
+   var divtest = document.createElement("div");
+   divtest.setAttribute("class", "nopadding row col-lg-12 removeclass" + room);
+   var rdiv = 'removeclass' + room;
+   var concatString = "";
+   concatString +=   '<div class="row col-lg-12">\
+                        <div class="col-lg-8">\
+                            <div class="input-group mb-2">\
+                                <select name=raw[] class="form-control select2  custom-select" style="width:100% " required>\
+                                    <option disabled hidden selected value="">Pick from Raw Materials</option>\
+                                    @foreach($raws as $row)\
+                                    <option value="{{ $row->id }}">\
+                                        {{$row->RWMT_NAME}} - {{$row->RWMT_ARBC_NAME}} </option>\
+                                    @endforeach\
+                                </select>\
+                            </div>\
+                        </div>';
+
+    concatString +=   '  <div class="col-lg-4">\
+                            <div class="input-group mb-3">\
+                                <input type="number" class="form-control" step=0.01 placeholder="KG Price" name=price[] required>\
+                                <div class="input-group-append">\
+                                    <button class="btn btn-danger" type="button" onclick="removeToab(" + room + ");"><i class="fa fa-minus"></i></button>\
+                                </div>\
+                            </div>\
+                        </div>\
+                    </div>';
+   
+   divtest.innerHTML = concatString;
+   
+   objTo.appendChild(divtest);
+   $(".select2").select2()
+
+   }
+
+   function removeToab(rid) {
+    $('.removeclass' + rid).remove();
+
+    }
+
+</script>
+    
 @endsection
