@@ -10,6 +10,7 @@ use App\Models\OrderItem;
 use App\Models\PaymentOption;
 use App\Models\Product;
 use App\Models\Client;
+use App\Models\DeliverySlot;
 use DateInterval;
 use DateTime;
 use Exception;
@@ -20,12 +21,28 @@ use Illuminate\Support\Facades\DB;
 class OrdersController extends Controller
 {
     public $data;
-    public $homeURL = "orders/acrive";
+    public $homeURL = "orders/active";
 
     public function __construct()
     {
         $this->middleware('auth');
         $this->middleware("\App\Http\Middleware\CheckType");
+    }
+
+    public function upcoming(Request $request)
+    {
+        $request->validate([
+            "date"  => 'required',
+            'slot'  => 'required'
+        ]);
+
+        $startDate = (new DateTime($request->date))->setTime(0,0,0);
+        $endDate = (new DateTime($request->date))->setTime(23,59,59);
+        $this->initTableArr(false, -1, -1, -1, true, $request->date, $request->slot);
+        $this->data['newCount'] = Order::getOrdersCountByState(1, $startDate, $endDate, $request->slot);
+        $this->data['readyCount'] = Order::getOrdersCountByState(2, $startDate, $endDate, $request->slot);
+        $this->data['inDeliveryCount'] = Order::getOrdersCountByState(3, $startDate, $endDate, $request->slot);
+        return view("orders.active", $this->data);
     }
 
     public function active()
@@ -72,6 +89,13 @@ class OrdersController extends Controller
         return view("orders.prepareHistory", $data);
     }
 
+    public function loadUpcoming()
+    {
+        $data['formURL'] = url('orders/get/new');
+        $data['slots'] = DeliverySlot::where("DSLT_ACTV", 1)->get();
+        return view("orders.prepareUpcoming", $data);
+    }
+
     public function history($year, $month, $state = -1)
     {
         $this->initTableArr(false, $state, $month, $year);
@@ -88,6 +112,7 @@ class OrdersController extends Controller
     {
         $this->data['inventory']    =   Inventory::with("product")->get();
         $this->data['areas']        =   Area::where('AREA_ACTV', 1)->get();
+        $this->data['slots']        =   DeliverySlot::where('DSLT_ACTV', 1)->get();
         $this->data['clients']        =   Client::all();
         $this->data['payOptions']   =  PaymentOption::where('PYOP_ACTV', 1)->get();
         $this->data['formTitle'] = "Add New Order";
@@ -141,7 +166,7 @@ class OrdersController extends Controller
         $data['editInfoURL']             =   url('orders/edit/details');
 
         $data['remainingMoney']         =   $data['order']->ORDR_TOTL - $data['order']->ORDR_PAID - $data['order']->ORDR_DISC - $data['order']->ORDR_CLNT_BLNC;
-
+      
         return view("orders.details", $data);
     }
 
@@ -372,15 +397,16 @@ class OrdersController extends Controller
         return redirect("orders/details/" . $order->id);
     }
 
-    public function settleFromClientBalance($id){
-        $order = Order::findOrFail($id); 
-        if(!(isset($order->ORDR_CLNT_ID) || is_numeric($order->ORDR_CLNT_ID))) {
+    public function settleFromClientBalance($id)
+    {
+        $order = Order::findOrFail($id);
+        if (!(isset($order->ORDR_CLNT_ID) || is_numeric($order->ORDR_CLNT_ID))) {
             abort(404);
         }
         $remainingMoney = $order->ORDR_TOTL - $order->ORDR_PAID - $order->ORDR_DISC - $order->ORDR_CLNT_BLNC;
         $client = Client::findOrFail($order->ORDR_CLNT_ID);
-        DB::transaction(function () use ($client, $order, $remainingMoney){
-            $client->pay(-1*$remainingMoney, "Order Settlement", $order->id);
+        DB::transaction(function () use ($client, $order, $remainingMoney) {
+            $client->pay(-1 * $remainingMoney, "Order Settlement", $order->id);
             $order->ORDR_CLNT_BLNC += $remainingMoney;
             $order->save();
         });
@@ -542,6 +568,7 @@ class OrdersController extends Controller
             "guestMob"      =>  "required_if:guest,1",
             "area"          =>  "required",
             "option"        =>  "required",
+            "slot"        =>  "required|exists:delivery_slots,id",
             "address"      =>  "required"
         ]);
         $order = new Order();
@@ -552,7 +579,8 @@ class OrdersController extends Controller
                 $order->ORDR_GEST_NAME = $request->guestName;
                 $order->ORDR_GEST_MOBN = $request->guestMob;
             }
-            $order->ORDR_OPEN_DATE = date('Y-m-d H:i:s');
+            $order->ORDR_OPEN_DATE = $request->date;
+            $order->ORDR_DSLT_ID = $request->slot;
             $order->ORDR_ADRS = $request->address;
             $order->ORDR_NOTE = $request->note;
             $order->ORDR_AREA_ID = $request->area;
@@ -583,19 +611,22 @@ class OrdersController extends Controller
      * if history set year e.g 2020
      * 
      */
-    private function initTableArr($isActive, $state = -1, $month = -1, $year = -1)
+    private function initTableArr($isActive, $state = -1, $month = -1, $year = -1, $upcoming = false, $date = null, $slot=-1)
     {
         if ($isActive == 1)
             $this->data['items']    = Order::getActiveOrders();
-        elseif ($month == -1 && $year == -1) {
+        elseif ($upcoming != false && $date !== null) {
+            $this->data['items']    = Order::getUpcomingOrders($date, $slot);
+        } elseif ($month == -1 && $year == -1) {
             $this->data['items']    = Order::getActiveOrders($state);
         } else {
             $this->data['items']    = Order::getOrdersByDate(false, $month, $year, $state);
         }
         $this->data['cardTitle'] = true;
-        $this->data['cols'] = ['id', 'Client', 'Status', 'Area', 'Payment', 'Ordered On', 'Closed On',  'KGs', 'Total'];
+        $this->data['cols'] = ['Date', 'Shift', 'Client', 'Status', 'Area', 'Closed',  'KGs', 'Total'];
         $this->data['atts'] = [
-            ['attUrl' => ['url' => "orders/details", "shownAtt" => 'id', "urlAtt" => 'id']],
+            'ORDR_OPEN_DATE',
+            'DSLT_NAME',
             ['urlOrStatic' => ['url' => "clients/profile", "shownAtt" => 'CLNT_NAME', "urlAtt" => 'ORDR_CLNT_ID', 'static' => 'ORDR_GEST_NAME']],
             [
                 'stateQuery' => [
@@ -613,9 +644,7 @@ class OrdersController extends Controller
                     'urlAtt'        =>  'id'
                 ]
             ],
-            'AREA_NAME',
-            'PYOP_NAME',
-            'ORDR_OPEN_DATE',
+            'AREA_NAME',     
             'ORDR_DLVR_DATE',
             ['number' => ['att' => 'itemsCount']],
             ['number' => ['att' => 'ORDR_TOTL']]

@@ -33,7 +33,7 @@
                                 <select name=userSel id=userSel class="select2 form-control custom-select" style="width: 100%; height:36px;" onchange="loadUser()">
                                     <option value="" disabled selected>Pick From Clients</option>
                                     @foreach($clients as $client)
-                                    <option value="{{ $client->id }}%%{{ $client->CLNT_AREA_ID}}%%{{$client->CLNT_ADRS}}" @if(old('user')==$client->id)
+                                    <option value="{{ $client->id }}%%{{ $client->CLNT_AREA_ID}}%%{{$client->CLNT_ADRS}}" @if(old('client')==$client->id)
                                         selected
                                         @endif
                                         >
@@ -42,7 +42,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <small class="text-danger">{{$errors->first('user')}}</small>
+                            <small class="text-danger">{{$errors->first('client')}}</small>
                         </div>
                     </div>
 
@@ -62,6 +62,26 @@
                             </div>
                             <small class="text-danger">{{$errors->first('guestMob')}}</small>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date</label>
+                        <div class="input-group mb-3">
+                            <input type="date" value="{{now()->format('Y-m-d')}}" class="form-control" placeholder="Pick a date" name=date required />
+                        </div>
+                        <small class="text-danger">{{$errors->first('date')}}</small>
+                    </div>
+    
+                    <div class="form-group">
+                        <label>Shift</label>
+                        <div class="input-group mb-3">
+                            <select name=slot class="select2 form-control custom-select" style="width: 100%; height:36px;" required>
+                                @foreach ($slots as $slot)
+                                <option value="{{$slot->id}}">{{$slot->DSLT_NAME}} -- {{$slot->DSLT_STRT->format('H:i')}} : {{$slot->DSLT_END->format('H:i')}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <small class="text-danger">{{$errors->first('slot')}}</small>
                     </div>
 
                     <div class="form-group">

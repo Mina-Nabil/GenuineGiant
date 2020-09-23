@@ -158,10 +158,11 @@
                       
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-cart-plus"></i><span class="hide-menu">Orders</span></a>
                             <ul aria-expanded="false" class="collapse">
-                                <li><a href="{{url('orders/active')}}">Active Orders</a></li>
+                                <li><a href="{{url('orders/active')}}">Show Active Orders</a></li>
+                                <li><a href="{{url('orders/load/new')}}">Load New Orders</a></li>
                                 <li><a href="{{url('orders/month')}}">Current Month</a></li>
                                 <li><a href="{{url('orders/load/history')}}">History</a></li>
-                                <li><a href="{{url('orders/add')}}">Place an Order</a></li>
+                                <li><a href="{{url('orders/add')}}">Place new Order</a></li>
                             </ul>
                         </li>
 

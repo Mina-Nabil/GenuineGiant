@@ -41,9 +41,9 @@
                     </div>
                     <div class="col-md-2">
                         <div class="font-bold">
-                            Area
+                            Shift
                         </div>
-                        <p>{{$order->AREA_NAME}}</p>
+                        <p>{{$order->DSLT_NAME}}</p>
                     </div>
                     <div class="col-md-2">
                         <div class="font-bold">
@@ -77,13 +77,19 @@
                         </div>
                         <p>{{$order->ORDR_TOTL ." EGP"}} {{($order->ORDR_DISC > 0) ? "(" .$order->ORDR_DISC. "EGP)" : ""}}</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-2">
+                        <div class="font-bold">
+                            Area
+                        </div>
+                        <p>{{$order->AREA_NAME}}</p>
+                    </div>
+                    <div class="col-md-4">
                         <div class="font-bold">
                             Delivery Address
                         </div>
                         <p>{{$order->ORDR_ADRS}}</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="font-bold">
                             Note
                         </div>

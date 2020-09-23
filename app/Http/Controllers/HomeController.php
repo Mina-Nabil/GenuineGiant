@@ -56,12 +56,12 @@ class HomeController extends Controller
         if (Auth::check()) {
             //Totals by Sub category
             $data['catgGraphs'] =  [
-                ['color' => "info", "name" => "Men"],
-                ['color' => "success", "name" => "Women"],
+                ['color' => "info", "name" => "Beef"],
+                ['color' => "success", "name" => "Chicken"],
             ];
             $data['catgTotals'] =  [
-                ["name" => "Shorts", "value" => "100", "unit" => "EGP" ],
-                ["name" => "T-Shirts", "value" => "200", "unit" => "EGP" ],
+                ["name" => "Beef", "value" => "100", "unit" => "EGP" ],
+                ["name" => "Chicken", "value" => "200", "unit" => "EGP" ],
             ];
             $data['catgCardTitle'] =  "Total Sales By Subcategories";
             $data['catgTitle'] =  "Totals Sales";
