@@ -103,7 +103,7 @@
                     <div class="form-group">
                         <label>Delivery Cost</label>
                         <div class="input-group mb-3">
-                            <input type="number" step=0.01 id=delCost class="form-control" placeholder="Guest Mobile Number" name=delCost value="{{ old('delCost')}}" required>
+                            <input type="number" step=0.01 id=delCost class="form-control" placeholder="Delivery Fees" name=delCost value="{{ old('delCost')}}" required>
                         </div>
                         <small class="text-danger">{{$errors->first('delCost')}}</small>
                     </div>
