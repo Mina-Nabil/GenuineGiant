@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-{{$errors}}
+
 <div class="row">
     <div class="col-lg-12">
         <div class="card">
