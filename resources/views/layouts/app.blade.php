@@ -172,10 +172,7 @@
                             <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fas fa-boxes"></i><span class="hide-menu"> Stock</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('inventory/current/stock')}}">End Product Stock</a></li>
-                                <li><a href="{{url('inventory/entry/new')}}">Add End Product Stock</a></li>
-                                <li><a href="{{url('inventory/transactions')}}">End Product Stock Transactions</a></li>
                                 <li><a href="{{url('rawmaterials/stock')}}"> Raw Material Stock</a></li>
-                                <li><a href="{{url('rawmaterials/entry/new')}}"> Raw Material Entry</a></li>
                             </ul>
                         </li>
                         @endif
@@ -201,7 +198,6 @@
                         <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-book"></i><span class="hide-menu"> Accounts</span></a>
                             <ul aria-expanded="false" class="collapse">
                                 <li><a href="{{url('accounts/cash')}}">Cash</a></li>
-                                <li><a href="{{url('accounts/invoices')}}">Raw Invoices</a></li>
                             </ul>
                         </li>
                         @endif
@@ -280,10 +276,10 @@
                     </div>
                     <div class="col-md-7 align-self-center text-right">
                         <div class="d-flex justify-content-end align-items-center">
-                            <a style="font-family: 'Oswald'" href="{{url('products/add')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Product</a>
-                            <a style="font-family: 'Oswald'" href="{{url('categories/show')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Category</a>
+                            <a style="font-family: 'Oswald'" href="{{url('inventory/current/stock')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-database"></i> Stock</a>
+                            <a style="font-family: 'Oswald'" href="{{url('rawmaterials/stock')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Raw</a>
                             <a style="font-family: 'Oswald'" href="{{url('orders/show/active')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fas fa-info-circle"></i> Check Orders </a>
-                            <a style="font-family: 'Oswald'" href="{{url('clients/add')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add User</a>
+                            <a style="font-family: 'Oswald'" href="{{url('clients/add')}}" class="btn btn-success d-none d-lg-block m-l-15"><i class="fa fa-plus-circle"></i> Add Client</a>
                         </div>
                     </div>
                 </div>

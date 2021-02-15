@@ -19,26 +19,15 @@ class InventoryController extends Controller
         $this->middleware("\App\Http\Middleware\CheckType");
     }
 
-    public function entry()
-    {
-        //models data
-        $data['products'] = Product::all();
-
-        //form data
-        $data['formURL'] = 'inventory/insert/entry';
-        $data['formTitle'] = "New Stock Entry";
-
-        return view("inventory.entry", $data);
-    }
 
     public function insert(Request $request)
     {
         $entryArr = $this->getEntryArray($request);
 
-        
 
-       $entryStatus = Inventory::insertEntry($entryArr, null, false, "New Stock Entry");
-        if($entryStatus !== false){
+
+        $entryStatus = Inventory::insertEntry($entryArr, null, false, "New Stock Entry");
+        if ($entryStatus !== false) {
             $data['raws'] = RawMaterial::all();
             $data['ingredients'] =  $this->getIngredients($entryArr);
             $data['formTitle'] = "Raw Material Consumption";
@@ -48,26 +37,27 @@ class InventoryController extends Controller
         } else {
             abort(500, "Entry Failed! Please try again");
         }
-        
     }
 
-    public function consumeRaw(Request $request){
-        $i=0;
-        foreach($request->raw as $rawID){
+    public function consumeRaw(Request $request)
+    {
+        $i = 0;
+        foreach ($request->raw as $rawID) {
             $raw = RawMaterial::findOrFail($rawID);
             $raw->addEntry(0, $request->count[$i++], null, 0, "Production Consumption", null, false);
         }
         return redirect('inventory/current/stock');
     }
 
-    private function getIngredients($entryArr){
+    private function getIngredients($entryArr)
+    {
         $ret = array();
-        foreach($entryArr as $entry){
+        foreach ($entryArr as $entry) {
             $product = Product::findOrFail($entry['modelID']);
             $ingredients = $product->ingredients;
-            foreach($ingredients as $raw){
-                $rawAmount = (($raw->IGDT_GRAM/1000)*$entry['count']) ;
-                if(array_key_exists($raw->IGDT_RWMT_ID, $ret)){
+            foreach ($ingredients as $raw) {
+                $rawAmount = (($raw->IGDT_GRAM / 1000) * $entry['count']);
+                if (array_key_exists($raw->IGDT_RWMT_ID, $ret)) {
                     $ret[$raw->IGDT_RWMT_ID] += $rawAmount;
                 } else {
                     $ret[$raw->IGDT_RWMT_ID] = $rawAmount;
@@ -111,6 +101,14 @@ class InventoryController extends Controller
             'totalOut',
             ['dynamicUrl' => ['val' => 'INTR_ORDR_ID', 'att' => 'INTR_ORDR_ID', '0' => 'orders/details/']]
         ];
+
+        //models data
+        $data['products'] = Product::all();
+
+        //form data
+        $data['formURL'] = 'inventory/insert/entry';
+        $data['formTitle'] = "New Stock Entry";
+
 
         return view("inventory.stock", $data);
     }

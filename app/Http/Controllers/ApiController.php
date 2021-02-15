@@ -3,14 +3,54 @@
 namespace App\Http\Controllers;
 
 use App\Models\Area;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\MOdels\Supplies;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ApiController extends Controller
 {
+    public function addOrderItems(Request $request)
+    {
+
+        $validation = Validator::make($request->all(), [
+            'orderID' => 'required|exists:orders,id',
+            'item' => 'required|array|min:1',
+            'count' => 'required|array|min:1',
+            'price' => 'required|array|min:1',
+        ]);
+
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+            return $this->returnAsJson("errors", $errors, false);
+        }
+
+        $order = Order::findOrFail($request->orderID);
+        DB::transaction(function () use ($order, $request) {
+            $orderItemArray = OrdersController::getOrderItemsArray($request);
+            if (count($orderItemArray) > 0) {
+                foreach ($orderItemArray as $item) {
+                    $orderItem = $order->order_items()->firstOrNew(
+                        ['ORIT_INVT_ID' => $item['ORIT_INVT_ID']]
+                    );
+                    $orderItem->ORIT_KGS    += $item['ORIT_KGS'];
+                    $orderItem->ORIT_PRCE   = $item['ORIT_PRCE'];
+                    $orderItem->ORIT_VRFD   = 0;
+                    $orderItem->save();
+                }
+                $order->recalculateTotal();
+                $order->addTimeline("New Items added to Order");
+            } else {
+                abort(404) ;
+            }
+        });
+
+        $arr = ['total' => $order->ORDR_TOTL, 'count' => $order->getOrderCount()];
+        return json_encode($arr);
+    }
 
     public function getProductPrices(Request $request)
     {

@@ -731,6 +731,6 @@
         return false;
     }
     return true;
-}
+    }
 </script>
 @endsection

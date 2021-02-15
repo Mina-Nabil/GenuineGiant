@@ -65,6 +65,14 @@ class Order extends Model
         $this->save();
     }
 
+    public function getOrderCount(){
+        $kgs = 0;
+        foreach ($this->order_items as $item) {
+            $kgs += $item->ORIT_KGS ;
+        }
+        return $kgs;
+    }
+
     public static function getOrdersByDate(bool $currentMonth = true, int $month = -1, int $year = -1, int $state = -1)
     {
 
@@ -140,7 +148,7 @@ class Order extends Model
             ->Leftjoin("delivery_slots", "ORDR_DSLT_ID", "=", "delivery_slots.id")
             ->Leftjoin("order_items", "ORIT_ORDR_ID", "=", "orders.id")
             ->join("payment_options", "ORDR_PYOP_ID", "=", "payment_options.id")
-            ->select("orders.*", 'drivers.DRVR_NAME', 'delivery_slots.DSLT_NAME', "orders.ORDR_GEST_NAME", "order_status.STTS_NAME", "areas.AREA_NAME", "AREA_RATE", "clients.CLNT_NAME", "clients.CLNT_MOBN", "dash_users.DASH_USNM", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount, DATE_FORMAT(ORDR_OPEN_DATE, '%e-%b-%y') as ORDR_OPEN_DATE")
+            ->select("orders.*", 'drivers.DRVR_NAME', 'delivery_slots.DSLT_NAME', "orders.ORDR_GEST_NAME", "order_status.STTS_NAME", "areas.AREA_NAME", "AREA_RATE", "clients.CLNT_NAME", "clients.CLNT_MOBN","dash_users.DASH_USNM", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount, DATE_FORMAT(ORDR_OPEN_DATE, '%e-%b-%y') as ORDR_OPEN_DATE")
             ->groupBy("orders.id", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME")
             ->where('orders.id', $id)->get()->first();
 
@@ -194,9 +202,10 @@ class Order extends Model
             ->Leftjoin("dash_users", "ORDR_DASH_ID", "=", "dash_users.id")
             ->Leftjoin("delivery_slots", "ORDR_DSLT_ID", "=", "delivery_slots.id")
             ->Leftjoin("order_items", "ORIT_ORDR_ID", "=", "orders.id")
+            ->Leftjoin("drivers", "ORDR_DRVR_ID", "=", "drivers.id")
             ->join("payment_options", "ORDR_PYOP_ID", "=", "payment_options.id")
-            ->select("orders.*", "order_status.STTS_NAME", "dash_users.DASH_USNM", "delivery_slots.DSLT_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount, DATE_FORMAT(ORDR_OPEN_DATE, '%e-%b-%y') as ORDR_OPEN_DATE")
-            ->groupBy("orders.id", "orders.ORDR_STTS_ID", "orders.ORDR_CLNT_ID", "delivery_slots.DSLT_NAME", "orders.ORDR_OPEN_DATE", "orders.ORDR_DLVR_DATE", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME");
+            ->select("orders.*", "order_status.STTS_NAME", "dash_users.DASH_USNM", "delivery_slots.DSLT_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "CLNT_BLNC", "payment_options.PYOP_NAME", "DRVR_NAME")->selectRaw("SUM(ORIT_KGS) as itemsCount, DATE_FORMAT(ORDR_OPEN_DATE, '%e-%b-%y') as ORDR_OPEN_DATE")
+            ->groupBy("orders.id", "orders.ORDR_STTS_ID", "orders.ORDR_CLNT_ID", "delivery_slots.DSLT_NAME","orders.ORDR_OPEN_DATE", "orders.ORDR_DLVR_DATE", "order_status.STTS_NAME", "areas.AREA_NAME", "clients.CLNT_NAME", "clients.CLNT_MOBN", "payment_options.PYOP_NAME");
     }
 
     public function addTimeline($text, $isdash = true)

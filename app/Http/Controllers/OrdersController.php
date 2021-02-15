@@ -174,7 +174,7 @@ class OrdersController extends Controller
     {
         $order = Order::findOrFail($orderID);
         DB::transaction(function () use ($order, $request) {
-            $orderItemArray = $this->getOrderItemsArray($request);
+            $orderItemArray = self::getOrderItemsArray($request);
             foreach ($orderItemArray as $item) {
                 $orderItem = $order->order_items()->firstOrNew(
                     ['ORIT_INVT_ID' => $item['ORIT_INVT_ID']]
@@ -588,9 +588,9 @@ class OrdersController extends Controller
             $order->ORDR_STTS_ID = 1; // new order
             $order->ORDR_DASH_ID = Auth::user()->id; // new order
 
-            $orderItemArray = $this->getOrderItemsObjectArray($request);
+            $orderItemArray = self::getOrderItemsObjectArray($request);
 
-            $order->ORDR_TOTL = $this->getOrderTotal($request);
+            $order->ORDR_TOTL = self::getOrderTotal($request);
 
             $order->save();
             $order->addTimeline("Order Opened by dashboard user");
@@ -614,47 +614,34 @@ class OrdersController extends Controller
     private function initTableArr($isActive, $state = -1, $month = -1, $year = -1, $upcoming = false, $date = null, $slot=-1)
     {
         if ($isActive == 1)
-            $this->data['items']    = Order::getActiveOrders();
+            $this->data['orders']    = Order::getActiveOrders();
         elseif ($upcoming != false && $date !== null) {
-            $this->data['items']    = Order::getUpcomingOrders($date, $slot);
+            $this->data['orders']    = Order::getUpcomingOrders($date, $slot);
         } elseif ($month == -1 && $year == -1) {
-            $this->data['items']    = Order::getActiveOrders($state);
+            $this->data['orders']    = Order::getActiveOrders($state);
         } else {
-            $this->data['items']    = Order::getOrdersByDate(false, $month, $year, $state);
+            $this->data['orders']    = Order::getOrdersByDate(false, $month, $year, $state);
         }
-        $this->data['cardTitle'] = true;
-        $this->data['cols'] = ['Date', 'Shift', 'Client', 'Status', 'Area', 'Closed',  'KGs', 'Total'];
-        $this->data['atts'] = [
-            'ORDR_OPEN_DATE',
-            'DSLT_NAME',
-            ['urlOrStatic' => ['url' => "clients/profile", "shownAtt" => 'CLNT_NAME', "urlAtt" => 'ORDR_CLNT_ID', 'static' => 'ORDR_GEST_NAME']],
-            [
-                'stateQuery' => [
-                    "classes" => [
-                        "1" => "label-info",
-                        "2" => "label-warning",
-                        "3" =>  "label-dark bg-dark",
-                        "4" =>  "label-success",
-                        "5" =>  "label-danger",
-                        "6" =>  "label-primary",
-                    ],
-                    "att"           =>  "ORDR_STTS_ID",
-                    'foreignAtt'    => "STTS_NAME",
-                    'url'           => "orders/details/",
-                    'urlAtt'        =>  'id'
-                ]
-            ],
-            'AREA_NAME',     
-            'ORDR_DLVR_DATE',
-            ['number' => ['att' => 'itemsCount']],
-            ['number' => ['att' => 'ORDR_TOTL']]
-        ];
+
+        $this->data['classes'] = [
+            "1" => "label-info",
+            "2" => "label-warning",
+            "3" =>  "label-dark bg-dark",
+            "4" =>  "label-success",
+            "5" =>  "label-danger",
+            "6" =>  "label-primary",
+        ] ;
+
+        $this->data['inventory']  =   Inventory::with("product")->get(); 
+
+
     }
 
-    private function getOrderItemsArray(Request $request)
+    public static function getOrderItemsArray(Request $request)
     {
         $retArr = array();
         foreach ($request->item as $index => $item) {
+            abort_if( ($request->count[$index] == null || $request->price[$index] == null)  , 500) ;
             array_push(
                 $retArr,
                 ["ORIT_INVT_ID" => $item, "ORIT_KGS" => $request->count[$index], "ORIT_PRCE" => $request->price[$index]]
@@ -663,7 +650,7 @@ class OrdersController extends Controller
         return $retArr;
     }
 
-    private function getOrderItemsObjectArray(Request $request)
+    public static function getOrderItemsObjectArray(Request $request)
     {
         $retArr = array();
         foreach ($request->item as $index => $item) {
@@ -674,7 +661,7 @@ class OrdersController extends Controller
         return $retArr;
     }
 
-    private function getOrderTotal(Request $request)
+    public static function getOrderTotal(Request $request)
     {
         $total = 0;
         foreach ($request->item as $index => $item) {

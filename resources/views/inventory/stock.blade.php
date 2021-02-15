@@ -41,7 +41,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Stock Table</h4>
+                <h4 class="card-title">Product Inventory</h4>
                 <h6 class="card-subtitle">Check current Raw Materials Stock List and latest transactions</h6>
                 <!-- Nav tabs -->
                 <div class="vtabs">
@@ -57,6 +57,13 @@
                                 <span class="hidden-sm-up">
                                     <i class="icon-graph"></i></span>
                                 <span class="hidden-xs-down">Transactions</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#add" role="tab" aria-selected="false">
+                                <span class="hidden-sm-up">
+                                    <i class="icon-graph"></i></span>
+                                <span class="hidden-xs-down">Add Entry</span>
                             </a>
                         </li>
                     </ul>
@@ -78,15 +85,107 @@
                             </div>
                         </div>
 
+                        <div class="tab-pane" id="add" role="tabpanel">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title">{{ $formTitle }}</h4>
+                                            <h5 class="card-subtitle">Insert a new Production entry, after entry the ingredients will be calculated for raw materials consumptions</h5>
+                                            <form class="form pt-3" method="post" action="{{ url($formURL) }}" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="row ">
+                            
+                                                    <div id="dynamicContainer" class="nopadding row col-lg-12">
+                                                    </div>
+                            
+                                                    <div class="row col-lg-12">
+                                                        <div class="col-lg-8">
+                                                            <div class="input-group mb-2">
+                                                                <select name=model[] class="form-control select2  custom-select" style="width: 100%" required>
+                                                                    <option disabled hidden selected value="">Products</option>
+                                                                    @foreach($products as $model)
+                                                                    <option value="{{ $model->id }}">
+                                                                        {{$model->PROD_NAME}} - {{$model->PROD_ARBC_NAME}} </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                
+                            
+                                                        <div class="col-lg-4">
+                                                            <div class="input-group mb-3">
+                                                                <input type="number" step=1 class="form-control amount" placeholder="KGs" name=count[] aria-describedby="basic-addon11" required>
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-success" id="dynamicAddButton" type="button" onclick="addToab();"><i class="fa fa-plus"></i></button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="btn btn-success mr-2">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-12">
-        {{-- <x-datatable id="myTable" :title="$title" :subtitle="$subTitle" :cols="$cols" :items="$items" :atts="$atts" /> --}}
-    </div>
-</div>
+
+
+
+<script>
+    var room = 1;
+   function addToab() {
+   
+   room++;
+   var objTo = document.getElementById('dynamicContainer')
+   var divtest = document.createElement("div");
+   divtest.setAttribute("class", "nopadding row col-lg-12 removeclass" + room);
+   var rdiv = 'removeclass' + room;
+   var concatString = "";
+   concatString +=   "  <div class='col-lg-8'>\
+                               <div class='input-group mb-2'>\
+                                   <select  name=model[] class='select2 form-control  custom-select'\
+                                       required>\
+                                       <option disabled hidden selected value=''>Products</option>\
+                                       @foreach($products as $model)\
+                                       <option value='{{ $model->id }}'>\
+                                           {{$model->PROD_NAME}} - {{$model->PROD_ARBC_NAME}} </option>\
+                                       @endforeach\
+                                   </select>\
+                               </div>\
+                           </div>";
+
+   
+   concatString +=                    " <div class='col-lg-4'>\
+                               <div class='input-group mb-3'>\
+                                   <input type='number' step=1 class='form-control amount' placeholder='KGs'\
+                                       name=count[] \
+                                       aria-describedby='basic-addon11' required>\
+                                   <div class='input-group-append'>\
+                                    <button class='btn btn-danger' type='button' onclick='removeToab(" + room + ");'><i class='fa fa-minus'></i></button>\
+                                   </div>\
+                               </div>\
+                           </div>";
+   
+   divtest.innerHTML = concatString;
+   
+   objTo.appendChild(divtest);
+   $(".select2").select2()
+
+   }
+
+   function removeToab(rid) {
+    $('.removeclass' + rid).remove();
+
+}
+   
+</script>
 @endsection

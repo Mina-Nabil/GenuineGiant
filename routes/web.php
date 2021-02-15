@@ -155,7 +155,9 @@ Route::get("suppliers/profile/{id}", 'SuppliersController@profile');
 Route::post("suppliers/update", 'SuppliersController@update');
 Route::post("suppliers/pay", 'SuppliersController@pay');
 
+//requests
 
+Route::post('api/add/order/items', 'ApiController@addOrderItems');
 Route::post('api/get/product/prices', 'ApiController@getProductPrices');
 Route::post('api/get/area/rate', 'ApiController@getAreaPrice');
 Route::post('api/get/raw/supp/price', 'ApiController@getSupplyPrice');
@@ -164,5 +166,5 @@ Route::post('api/get/raw/supp/price', 'ApiController@getSupplyPrice');
 Route::get('logout', 'HomeController@logout')->name('logout');
 Route::get('/login', 'HomeController@login')->name('login');
 Route::post('/login', 'HomeController@authenticate')->name('login');
-Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/', 'HomeController@index')->name('home');
+Route::get('/home', 'OrdersController@active')->name('home');
+Route::get('/', 'OrdersController@active')->name('home');

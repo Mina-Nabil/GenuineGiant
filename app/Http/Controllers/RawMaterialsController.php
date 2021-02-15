@@ -32,6 +32,7 @@ class RawMaterialsController extends Controller
             ["number" => ['att' => 'RWMT_BLNC', 'nums' => 2]],
             ['edit' => ['url' => 'rawmaterials/edit/', 'att' => 'id']],
         ];
+        
         $this->data['homeURL'] = $this->homeURL;
     }
 
@@ -112,22 +113,42 @@ class RawMaterialsController extends Controller
             ["comment" => ['att' => 'RINV_CMNT']],
         ];
 
+
+        $data['todayInvoices'] = RawInvoice::with('supplier')->whereDate('created_at', Carbon::today())->get();
+        $data['todayTitle'] = "Today's RawMaterials Purchases";
+        $data['todaySubTitle'] = "Check all Raw Materials Invoices registered on " . Carbon::today()->format('d/M/Y');
+
+        //Same cols and atts for both
+        $data['cols'] = ['#', 'Date', 'Supplier Name', 'KGs', 'Cost', 'Paid'];
+        $data['atts'] = [
+            ['verified' => ['att' => 'id', 'isVerified' => 'RINC_VRFD']],
+            ['date' => ['att' => 'created_at']],
+            ['foreignUrl' => ['suppliers/profile', 'RINC_SUPP_ID', 'supplier', 'SUPP_NAME']],
+            ["number" => ['att' => 'RINC_KGS', 'nums' => 2]],
+            ["number" => ['att' => 'RINC_COST', 'nums' => 2]],
+            ["number" => ['att' => 'RINC_PAID', 'nums' => 2]],
+        ];
+        //form
+        $data['invoiceFormTitle'] = "Add New Invoice";
+        $data['invoiceFormURL'] = url('invoice/insert');
+        $data['suppliers'] = Supplier::all();
+        $data['raws'] = RawMaterial::all();
+
+        //totals
+        $carbonDate = Carbon::today();
+        $data['paidToday'] = RawInvoice::whereDate('created_at', $carbonDate)->sum('RINC_PAID');
+        $data['paidMonth'] = RawInvoice::whereYear('created_at', $carbonDate->format('Y'))->whereMonth('created_at', $carbonDate->format('m'))->sum('RINC_PAID');
+
         //Summary
         $data['totalKG'] = $data['raws']->sum('RWMT_BLNC');
         $data['averagePrice'] = $data['raws']->average('RWMT_COST');
         $data['totalCost'] = $data['totalKG'] * $data['averagePrice'];
 
+        //new entry
+        $data['entryFormTitle'] = "Add New Raw Material Entry";
+        $data['entryFormURL'] = url("rawmaterials/entry/insert");
 
         return view('raw.stock', $data);
-    }
-
-    public function entry()
-    {
-        $data['raws'] = RawMaterial::all();
-        $data['suppliers'] = Supplier::all();
-        $data['formTitle'] = "Add New Raw Material Entry";
-        $data['formURL'] = url("rawmaterials/entry/insert");
-        return view("raw.entry", $data);
     }
 
     public function insertEntry(Request $request)
@@ -184,7 +205,7 @@ class RawMaterialsController extends Controller
             }
             $invoice->save();
         });
-        return redirect('accounts/invoices');
+        return redirect('rawmaterials/invoices');
     }
 
 
